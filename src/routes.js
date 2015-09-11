@@ -6,25 +6,25 @@ module.exports = ['$urlRouterProvider', '$locationProvider', '$stateProvider',
     $stateProvider.
       state('event', {
         url: '/events/:eventUrl',
-        templateUrl: 'partials/event.html',
+        templateUrl: 'views/event.html',
         controller: 'EventCtrl',
         controllerAs: 'event'
       }).
       state('newEvent', {
         url: '/event',
-        templateUrl: 'partials/event.html',
+        templateUrl: 'views/event.html',
         controller: 'EventCtrl',
         controllerAs: 'event'
       }).
       state('calendarView', {
         url: '/calendar/:resolution',
-        templateUrl: 'partials/calendar.html',
+        templateUrl: 'views/calendar.html',
         controller: 'CalendarCtrl',
         controllerAs: 'calendar'
       }).
       state('calendarDefaultView', {
         url: '/calendar',
-        templateUrl: 'partials/calendar.html',
+        templateUrl: 'views/calendar.html',
         controller: 'CalendarCtrl',
         controllerAs: 'calendar'
       })

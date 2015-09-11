@@ -4,16 +4,15 @@ module.exports = 'controllers/calendar/daytris-calendar'
 var dependencies = [
   require('../events/event.ctrl.js'),
   require('../../lib/color.js'),
-  'ngRoute',
   'ui.calendar'
 ]
 
 angular.module(module.exports, dependencies).controller('CalendarCtrl', [
-        '$routeParams', '$location', 'uiCalendarConfig', 'Event',
-function($routeParams,   $location,   uiCalendarConfig,   Event) {
+        '$state', '$stateParams', 'uiCalendarConfig', 'Event',
+function($state,   $stateParams,   uiCalendarConfig,   Event) {
   
   var view = 'agendaWeek'
-  switch($routeParams.resolution) {
+  switch($stateParams.resolution) {
     case 'day': view = 'agendaDay'; break
     case 'week': view = 'agendaWeek'; break
     case 'month': view = 'month'; break
@@ -24,7 +23,7 @@ function($routeParams,   $location,   uiCalendarConfig,   Event) {
     defaultView: view,
     columnFormat: 'dd D.M.',
     eventClick: function(event) {
-      $location.url('/events/' + event.eventUrl)
+      $state.go('event', { eventUrl: event.eventUrl })
     }
   }
   

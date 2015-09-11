@@ -2,7 +2,10 @@
 
 <html lang="en" ng-app="daytris">
   <head>
-    <base href="/">
+    <script type="text/javascript" src="config/base.js"></script>
+    <script type="text/javascript">
+      document.write('<base href="' + BASE_TAG_HREF + '">');
+    </script>
     <meta charset="utf-8">
     <title>Daytris</title>
     
@@ -18,7 +21,7 @@
     <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
     <script type="text/javascript" src="bower_components/moment/min/moment.min.js"></script>
     <script type="text/javascript" src="bower_components/angular/angular.js"></script>
-    <script type="text/javascript" src="bower_components/angular-route/angular-route.js"></script>
+    <script type="text/javascript" src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
     <script type="text/javascript" src="bower_components/angular-resource/angular-resource.js"></script>
     <script type="text/javascript" src="bower_components/angular-cookies/angular-cookies.js"></script>
     <script type="text/javascript" src="bower_components/angular-ui-calendar/src/calendar.js"></script>
@@ -43,8 +46,8 @@
     <div class="dt-page">
       <nav class="uk-navbar dt-form-navbar" tns="navigation">
         <ul class="uk-navbar-nav">
-          <li ng-class="{ 'uk-active': main.pageCtrlMatches('CalendarCtrl') }"><a href="/calendar" t>Calendar</a></li>
-          <li ng-class="{ 'uk-active': main.pageCtrlMatches('EventCtrl') }"><a href="/event" t>Event</a></li>
+          <li ng-class="{ 'uk-active': main.pageCtrlEquals('CalendarCtrl') }" ui-sref-active="uk-active"><a ui-sref="calendarDefaultView()" t>Calendar</a></li>
+          <li ng-class="{ 'uk-active': main.pageCtrlEquals('EventCtrl') }" ui-sref-active="uk-active"><a ui-sref="newEvent()" t>Event</a></li>
         </ul>
       </nav>
       <hr class="dt-blank-divider">
@@ -68,7 +71,7 @@
         </div>
       </form>
       <hr class="dt-blank-divider">
-      <div ng-view></div>
+      <div ui-view></div>
     </div>
   </body>
 </html>

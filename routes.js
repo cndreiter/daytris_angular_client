@@ -1,27 +1,33 @@
 'use strict'
 
-module.exports = ['$locationProvider', '$routeProvider',
-  function($locationProvider, $routeProvider) {
+module.exports = ['$urlRouterProvider', '$locationProvider', '$stateProvider',
+  function($urlRouterProvider, $locationProvider, $stateProvider) {
     $locationProvider.html5Mode(true)
-    $routeProvider.
-      when('/events/:eventUrl', {
+    $stateProvider.
+      state('event', {
+        url: '/events/:eventUrl',
         templateUrl: 'partials/event.html',
-        controller: 'EventCtrl as event'
+        controller: 'EventCtrl',
+        controllerAs: 'event'
       }).
-      when('/event', {
+      state('newEvent', {
+        url: '/event',
         templateUrl: 'partials/event.html',
-        controller: 'EventCtrl as event'
+        controller: 'EventCtrl',
+        controllerAs: 'event'
       }).
-      when('/calendar/:resolution', {
+      state('calendarView', {
+        url: '/calendar/:resolution',
         templateUrl: 'partials/calendar.html',
-        controller: 'CalendarCtrl as calendar'
+        controller: 'CalendarCtrl',
+        controllerAs: 'calendar'
       }).
-      when('/calendar', {
+      state('calendarDefaultView', {
+        url: '/calendar',
         templateUrl: 'partials/calendar.html',
-        controller: 'CalendarCtrl as calendar'
-      }).
-      otherwise({
-        redirectTo: '/calendar'
+        controller: 'CalendarCtrl',
+        controllerAs: 'calendar'
       })
+    $urlRouterProvider.otherwise('/calendar')
   }
 ]

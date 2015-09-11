@@ -4,34 +4,29 @@ module.exports = 'controllers/daytris-main'
 var dependencies = [
   require('../page.js'),
   require('../lib/color.js'),
-  require('../lib/translator.js'),
-  'ngRoute'
+  require('../lib/translator.js')
 ]
 
 var translations = require('./main.translations.js')
 
 angular.module(module.exports, dependencies).controller('MainCtrl', [
-        'page', '$scope', '$route', '$routeParams', '$location', 't',
-function(page,   $scope,   $route,   $routeParams,   $location,   t) {
+        'page', '$scope', '$state', 't',
+function(page,   $scope,   $state,   t) {
   var me = this
   
   translations(t) // use translations from main.translations.js
-  console.log(t)
   
   me.getPageControllerName = function() {
     var result = false
-    var current = $route.current
+    var current = $state.current
     if(current) {
-      var route = current.$$route
-      if(route) {
-        return route.controller
-      }
+      return current.controller
     }
   }
   
-  me.pageCtrlMatches = function(controllerName) {
+  me.pageCtrlEquals = function(controllerName) {
     var pageControllerName = me.pageControllerName || ''
-    var result = pageControllerName.indexOf(controllerName) == 0
+    var result = pageControllerName == controllerName
     return result
   }
   

@@ -5,18 +5,17 @@ var dependencies = [
   require('./event.rest.js'),
   require('../../lib/date.js'),
   require('../../lib/translator.js'),
-  'ngRoute'
+  'ui.router'
 ]
 
 var translations = require('./event.translations.js')
 
 angular.module(module.exports, dependencies).controller('EventCtrl', [
-        '$routeParams', '$location', 'Event', 'date', 't',
-function($routeParams,   $location,   Event,   date,   t) {
+        '$state', '$stateParams', 'Event', 'date', 't',
+function($state,   $stateParams,   Event,   date,   t) {
   var me = this
   
   translations(t) // use translations from event.translations.js
-  console.log(t)
   
   var initNew = function() {
     me.record = new Event({})
@@ -31,9 +30,9 @@ function($routeParams,   $location,   Event,   date,   t) {
 
     me.submit = function() {
       me.record.$save(function() {
-        $location.url('/events/' + me.record.url)
+        $state.go('event', { eventUrl: me.record.url })
       })
-      $location.url('/')
+      $state.go('calendarDefaultView')
     }
   }
   
@@ -43,18 +42,18 @@ function($routeParams,   $location,   Event,   date,   t) {
     }
     me.delete = function() {
       Event.delete({ id: me.record.id }, function() {
-        $location.url('/calendar')
+        $state.go('calendarDefaultView')
       })
     }
   }
   
-  var url = $routeParams.eventUrl
+  var url = $stateParams.eventUrl
   if(url) {
     // UPDATE and DELETE
     Event.get({
       filter: JSON.stringify({
         where: {
-          url: $routeParams.eventUrl
+          url: $stateParams.eventUrl
         }
       })
     }, function(records) {
@@ -62,7 +61,7 @@ function($routeParams,   $location,   Event,   date,   t) {
       if(me.record) {
         initExisting()
       } else {
-        $location.url('/event')
+        $state.go('newEvent')
       }
     })
   } else {

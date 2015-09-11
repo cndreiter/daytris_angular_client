@@ -1,7 +1,7 @@
 'use strict'
 
 var dependencies = [
-  'ngRoute',
+  'ui.router',
   'ngResource',
   'ngCookies',
   'ui.calendar',

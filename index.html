@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+
+<html lang="en" ng-app="daytris">
+  <head>
+    <base href="/">
+    <meta charset="utf-8">
+    <title>Daytris</title>
+    
+    <link rel="stylesheet/less" type="text/css" href="daytris.less">
+    <script src="less.js" type="text/javascript"></script>
+    
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png">
+    
+    <!-- JAVASCRIPTS -->
+    
+    <!-- angular-ui-calendar with angular -->
+    <!-- jquery, moment, and angular have to get included before fullcalendar -->
+    <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+    <script type="text/javascript" src="bower_components/moment/min/moment.min.js"></script>
+    <script type="text/javascript" src="bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="bower_components/angular-route/angular-route.js"></script>
+    <script type="text/javascript" src="bower_components/angular-resource/angular-resource.js"></script>
+    <script type="text/javascript" src="bower_components/angular-cookies/angular-cookies.js"></script>
+    <script type="text/javascript" src="bower_components/angular-ui-calendar/src/calendar.js"></script>
+    <script type="text/javascript" src="bower_components/fullcalendar/dist/fullcalendar.js"></script>
+    <script type="text/javascript" src="bower_components/fullcalendar/dist/lang/de.js"></script>
+    <script type="text/javascript" src="bower_components/fullcalendar/dist/gcal.js"></script>
+    
+    <!-- uikit -->
+    <script type="text/javascript" src="bower_components/uikit/js/uikit.js"></script>
+    <script type="text/javascript" src="bower_components/uikit/js/components/autocomplete.js"></script>
+    <script type="text/javascript" src="bower_components/uikit/js/components/datepicker.js"></script>
+    <script type="text/javascript" src="bower_components/uikit/js/components/timepicker.js"></script>
+    
+    <!-- daytris -->
+    <script type="text/javascript" src="bundle.js"></script>
+    
+  </head>
+  <body ng-controller="MainCtrl as main">
+    <div class="dt-header">
+      <h1 class="dt-heading">Daytris Social Organizer</h1>
+    </div>
+    <div class="dt-page">
+      <nav class="uk-navbar dt-form-navbar" tns="navigation">
+        <ul class="uk-navbar-nav">
+          <li ng-class="{ 'uk-active': main.pageCtrlMatches('CalendarCtrl') }"><a href="/calendar" t>Calendar</a></li>
+          <li ng-class="{ 'uk-active': main.pageCtrlMatches('EventCtrl') }"><a href="/event" t>Event</a></li>
+        </ul>
+      </nav>
+      <hr class="dt-blank-divider">
+      <form class="uk-form" ng-submit="main.updateUsername()">
+        <span tns="navigation">
+          <a href="/event" ng-cloak ng-show="main.pageCtrlMatches('CalendarCtrl')" class="uk-button uk-button-large" t>New Event</a>
+        </span>
+        <span tns="user">
+          <input type="text" class="uk-form-large" ng-model="main.username" placeholder="Your Nickname" t ttarget="placeholder">
+          <button type="submit" class="uk-button uk-button-primary uk-button-large" ng-cloak ng-show="main.usernameDirty()" t>Set</button>
+        </span>
+        <div class="dt-color-palette">
+          <a class="dt-color-icon dt-chosen" ng-click="main.togglePalette()" ng-style="{ 'background-color': chosenColor() }"></a>
+          <div class="dt-color-palette" ng-cloak ng-show="main.palette">
+            <a class="dt-color-icon" color-icon="green"></a>
+            <a class="dt-color-icon" color-icon="blue"></a>
+            <a class="dt-color-icon" color-icon="orange"></a>
+            <a class="dt-color-icon" color-icon="palevioletred"></a>
+            <a class="dt-color-icon" color-icon="red"></a>
+          </div>
+        </div>
+      </form>
+      <hr class="dt-blank-divider">
+      <div ng-view></div>
+    </div>
+  </body>
+</html>

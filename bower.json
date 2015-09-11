@@ -1,0 +1,28 @@
+{
+  "name": "daytris",
+  "version": "0.0.0",
+  "authors": [
+    "Christian Niederreiter <cndreiter@gmail.com>"
+  ],
+  "description": "Social Organizer",
+  "main": "app.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.5",
+    "angular-route": "~1.4.5",
+    "angular-resource": "~1.4.5",
+    "angular-cookies": "~1.4.5",
+    "angular-ui-calendar": "~1.0.1",
+    "uikit": "~2.22.0"
+  },
+  "resolutions": {
+    "angular": "~1.4.5"
+  }
+}

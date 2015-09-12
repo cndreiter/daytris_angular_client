@@ -37,7 +37,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
     }
     var qEId = "'"+event.id+"'" // quoted event id for use as function parameter
     return '<div class="dt-color-palette">\
-' + s + '\
+' + s + '\n\
 <a ng-cloak ng-show="calendar.userOk()" ng-click="calendar.addParticipant('+qEId+'); $event.stopPropagation()" class="dt-add-icon">+</a>\
 </div>'
   }

@@ -43,7 +43,7 @@ function(page,   $scope,   $state,   t) {
   }
   
   $scope.chooseColor = function(color) {
-    page.userColor = color
+    page.setUserColor(color)
     me.palette = false
   }
   $scope.chosenColor = function() {

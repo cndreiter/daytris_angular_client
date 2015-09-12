@@ -12,9 +12,10 @@ var dependencies = [
 var translations = require('./event.translations.js')
 
 angular.module(module.exports, dependencies).controller('EventCtrl', [
-        'page', '$state', '$stateParams', 'Event', 'Comment', 'date', 't',
-function(page,   $state,   $stateParams,   Event,   Comment,   date,   t) {
+        'page', '$scope', '$state', '$stateParams', 'Event', 'Participant', 'Comment', 'date', 't', '$interval',
+function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Comment,   date,   t,   $interval) {
   var me = this
+  var intervals = []
   
   translations(t) // use translations from event.translations.js
   
@@ -62,6 +63,7 @@ function(page,   $state,   $stateParams,   Event,   Comment,   date,   t) {
       me.record = records[0]
       if(me.record) {
         initExisting()
+        me.initParticipants()
         me.initComments()
       } else {
         $state.go('newEvent')
@@ -70,6 +72,25 @@ function(page,   $state,   $stateParams,   Event,   Comment,   date,   t) {
   } else {
     // CREATE
     initNew()
+  }
+  
+  // PARTICIPANTS
+  
+  // websocket simulation
+  var loadParticipants = function() {
+    Participant.get({
+      filter: JSON.stringify({
+        eventUrl: me.record.url,
+        where: {
+          eventId: me.record.id
+        }
+      })
+    }, function(response) {
+      me.record.participants = response
+    })
+  }
+  me.initParticipants = function() {
+    intervals.push($interval(loadParticipants, 10000))
   }
   
   // COMMENTS
@@ -95,6 +116,21 @@ function(page,   $state,   $stateParams,   Event,   Comment,   date,   t) {
       })
     })
   }
+  var loadComments = function(initial) {
+    Comment.get({
+      filter: JSON.stringify({
+        eventUrl: me.record.url,
+        where: {
+          eventId: me.record.id
+        }
+      })
+    }, function(response) {
+      me.comments = response.data
+      if(initial) {
+        $('.dt-message-input')[0].focus() // FIXME make this independent of the REST response
+      }
+    })
+  }
   me.initComments = function() {
     me.submitComment = function() {
       var comment = new Comment({})
@@ -108,17 +144,21 @@ function(page,   $state,   $stateParams,   Event,   Comment,   date,   t) {
         me.initComments()
       })
     }
-    Comment.get({
-      filter: JSON.stringify({
-        eventUrl: me.record.url,
-        where: {
-          eventId: me.record.id
-        }
+    loadComments(true)
+    
+    // websocket simulation
+    var callback = function() {
+      loadComments(false)
+    }
+    intervals.push($interval(callback, 7000))
+    
+    $scope.$on('$destroy', function() {
+      intervals.forEach(function(interval) {
+        console.log("$scope $destroyed => cancel interval", interval)
+        $interval.cancel(interval)
       })
-    }, function(response) {
-      me.comments = response.data
-      $('.dt-message-input')[0].focus() // FIXME make this independent of the REST response
     })
+    
   }
   
 }])

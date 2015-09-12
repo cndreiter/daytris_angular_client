@@ -10,8 +10,10 @@ var dependencies = [
 ]
 
 angular.module(module.exports, dependencies).controller('CalendarCtrl', [
-        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant', 't',
-function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant,   t) {
+        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant', 't', '$interval',
+function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant,   t,   $interval) {
+  
+  var intervals = []
   
   var resolution = $stateParams.resolution
   var view = 'agendaWeek'
@@ -116,5 +118,18 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
       callback(mapped)
     })
   }]
+  
+  // websocket simulation
+  var callback = function() {
+    uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
+  }
+  intervals.push($interval(callback, 10000))
+  
+  $scope.$on('$destroy', function() {
+    intervals.forEach(function(interval) {
+      console.log("$scope $destroyed => cancel interval", interval)
+      $interval.cancel(interval)
+    })
+  })
 
 }])

@@ -118,6 +118,11 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
     })
   }
   var loadComments = function(initial) {
+    if(!initial) {
+      if(me.markedComments().length > 0) {
+        return
+      }
+    }
     Comment.get({
       filter: JSON.stringify({
         eventUrl: me.record.url,

@@ -2,7 +2,6 @@
 
 var dependencies = [
   'ui.router',
-  'ngResource',
   'ngCookies',
   'ui.calendar',
   require('./controllers/main.ctrl.js'),

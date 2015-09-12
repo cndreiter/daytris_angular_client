@@ -19,6 +19,12 @@ var eventInputs = {
   "Event's URL ending (part after last /)": "URL-Ende (Teil der URL nach dem letzten /)"
 }
 
+var commentInputs = {
+  'Message': 'Nachricht',
+  'Your Message': 'Deine Nachricht'
+}
+
 module.exports = function(t) {
   t.add('eventInputs', eventInputs)
+  t.add('commentInputs', commentInputs)
 }

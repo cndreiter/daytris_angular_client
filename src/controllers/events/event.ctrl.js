@@ -108,6 +108,7 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
     var n = comments.length
     var done = { count: 0 }
     comments.forEach(function(comment) {
+      console.log("delete ", comment.id, me.record.url)
       Comment.delete({ id: comment.id, eventUrl: me.record.url }, function() {
         done.count += 1
         if(done.count >= n) {

@@ -3,12 +3,23 @@
 module.exports = 'lib/daytris-color'
 var dependencies = []
 
-angular.module(module.exports, dependencies).directive('colorIcon', function() {
+angular.module(module.exports, dependencies)
+.directive('colorIcon', function() {
   return {
     restrict: 'A',
     scope: true,
     controller: function($scope, $element, $attrs) {
       var color = $attrs.colorIcon
+      $element.css('background-color', color)
+    }
+  }
+})
+.directive('colorChooserIcon', function() {
+  return {
+    restrict: 'A',
+    scope: true,
+    controller: function($scope, $element, $attrs) {
+      var color = $attrs.colorChooserIcon
       $element.css('background-color', color)
       $scope.$watch('$parent.chosenColor()', function() {
         if($scope.$parent.chosenColor() == color) {

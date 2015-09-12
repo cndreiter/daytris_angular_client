@@ -46,13 +46,13 @@
       <h1 class="dt-heading">Daytris Social Organizer</h1>
     </div>
     
-    <div id="messageModal" class="uk-modal">
+    <div id="messageModal" class="uk-modal" tns="messageModal">
       <div class="uk-modal-dialog">
         <div ng-bind="main.messageModal.message"></div>
         <hr class="dt-blank-divider">
         <div>
-          <button class="uk-button uk-modal-close" ng-click="main.messageModal.okFunc()" ng-bind="main.messageModal.okButtonText">OK</button>
-          <button class="uk-button uk-modal-close" ng-bind="main.messageModal.cancelButtonText">Cancel</button>
+          <button class="uk-button uk-modal-close" ng-click="main.messageModal.okFunc()" ng-bind="main.messageModal.okButtonText" t>OK</button>
+          <button class="uk-button uk-modal-close" ng-bind="main.messageModal.cancelButtonText" t>Cancel</button>
         </div>
       </div>
     </div>
@@ -83,9 +83,9 @@
         <hr class="dt-blank-divider">
         <div tns="navigation">
           <span class="uk-button-group">
-            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'day' })" ui-sref-active="uk-active">Day</a>
-            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'week' })" ui-sref-active="uk-active">Week</a>
-            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'month' })" ui-sref-active="uk-active">Month</a>
+            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'day' })" ui-sref-active="uk-active" t>Day</a>
+            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'week' })" ui-sref-active="uk-active" t>Week</a>
+            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'month' })" ui-sref-active="uk-active" t>Month</a>
           </span>
           <a ui-sref="newEvent()" ng-cloak ng-show="main.pageCtrlEquals('CalendarCtrl')" class="uk-button uk-button-large" t>New Event</a>
         </div>

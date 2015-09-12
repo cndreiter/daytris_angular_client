@@ -10,8 +10,8 @@ var dependencies = [
 ]
 
 angular.module(module.exports, dependencies).controller('CalendarCtrl', [
-        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant',
-function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant) {
+        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant', 't',
+function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant,   t) {
   
   var resolution = $stateParams.resolution
   var view = 'agendaWeek'
@@ -64,12 +64,15 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
       })
     }
     if((name != page.username) || (color != page.userColor)) {
+      // configure modal
+      var mt = t.allTranslations.messageModal
       $scope.main.messageModal = {
-        message: 'Remove participant ' + name + '?',
-        okButtonText: 'Yes, remove participant',
-        cancelButtonText: 'Cancel',
+        message: mt['Remove participant '] + name + mt['?'],
+        okButtonText: mt['Yes, remove participant'],
+        cancelButtonText: mt['Cancel'],
         okFunc: deleteParticipant
       }
+      // show modal
       UIkit.modal('#messageModal').show()
     } else {
       deleteParticipant()

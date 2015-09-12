@@ -29,14 +29,14 @@
 
 <div class="uk-panel uk-panel-box dt-blank-panel" ng-cloak ng-show="event.submitComment">
   <form class="uk-form uk-form-horizontal" ng-submit="event.submitComment()" tns="commentInputs">
-    <div class="uk-form-row">
+    <div class="uk-form-row" ng-cloak ng-show="event.record.participants.length">
       <label class="uk-form-label">Teilnehmer</label>
       <div ng-repeat="participant in event.record.participants" class="dt-participant">
         <span class="dt-color-icon dt-inline" ng-style="{ 'background-color': participant.color }"></span>
         <span ng-bind="participant.name"></span>
       </div>
+      <hr class="uk-article-separator">
     </div>
-    <hr class="uk-article-separator">
     <div class="uk-form-row" ng-repeat="comment in event.comments">
       <label class="uk-form-label dt-comment-author">
         <span class="dt-color-icon dt-inline" ng-style="{ 'background-color': comment.color }"></span>

@@ -2,9 +2,10 @@
 
 <html lang="en" ng-app="daytris">
   <head>
-    <script type="text/javascript" src="config/base.js"></script>
+    <script type="text/javascript" src="/demo/config/base.js"></script>
     <script type="text/javascript">
-      document.write('<base href="' + BASE_TAG_HREF + '">')
+    var baseTagHref = (typeof BASE_TAG_HREF !== 'undefined')? BASE_TAG_HREF : '/';
+    document.write('<base href="' + baseTagHref + '">')
     </script>
     <meta charset="utf-8">
     <title>Daytris</title>
@@ -34,6 +35,7 @@
     <script type="text/javascript" src="bower_components/uikit/js/components/autocomplete.js"></script>
     <script type="text/javascript" src="bower_components/uikit/js/components/datepicker.js"></script>
     <script type="text/javascript" src="bower_components/uikit/js/components/timepicker.js"></script>
+    <script type="text/javascript" src="bower_components/uikit/js/components/tooltip.js"></script>
     
     <!-- daytris -->
     <script type="text/javascript" src="dist/bundle.js"></script>
@@ -43,6 +45,18 @@
     <div class="dt-header">
       <h1 class="dt-heading">Daytris Social Organizer</h1>
     </div>
+    
+    <div id="messageModal" class="uk-modal">
+      <div class="uk-modal-dialog">
+        <div ng-bind="main.messageModal.message"></div>
+        <hr class="dt-blank-divider">
+        <div>
+          <button class="uk-button uk-modal-close" ng-click="main.messageModal.okFunc()" ng-bind="main.messageModal.okButtonText">OK</button>
+          <button class="uk-button uk-modal-close" ng-bind="main.messageModal.cancelButtonText">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
     <div class="dt-page">
       <nav class="uk-navbar dt-form-navbar" tns="navigation">
         <ul class="uk-navbar-nav">

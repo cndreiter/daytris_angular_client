@@ -16,7 +16,7 @@ function(page,   $scope,   $state,   t) {
   
   translations(t) // use translations from main.translations.js
   
-  me.getPageControllerName = function() {
+  $scope.getPageControllerName = function() {
     var result = false
     var current = $state.current
     if(current) {
@@ -30,8 +30,14 @@ function(page,   $scope,   $state,   t) {
     return result
   }
   
-  $scope.$on('$locationChangeSuccess', function() {
-    me.pageControllerName = me.getPageControllerName()
+  $scope.$on('$locationChangeSuccess', function(event) {
+    var watcher = {}
+    watcher.unwatch = $scope.$watch('getPageControllerName()', function(value) {
+      if(value) {
+        watcher.unwatch()
+        me.pageControllerName = $scope.getPageControllerName()
+      }
+    })
   })
   
   me.username = page.username

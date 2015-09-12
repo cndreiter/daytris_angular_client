@@ -45,6 +45,7 @@ function(page,   $scope,   $state,   t) {
     return me.username != page.username
   }
   me.updateUsername = function() {
+    page.setUserColor(null) // reset user color
     page.setUsername(me.username)
   }
   

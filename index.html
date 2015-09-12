@@ -66,22 +66,28 @@
       </nav>
       <hr class="dt-blank-divider">
       <form class="uk-form" ng-submit="main.updateUsername()">
-        <span tns="navigation">
-          <a ui-sref="newEvent()" ng-cloak ng-show="main.pageCtrlEquals('CalendarCtrl')" class="uk-button uk-button-large" t>New Event</a>
-        </span>
-        <span tns="user">
+        <div tns="user">
           <input type="text" class="uk-form-large" ng-model="main.username" placeholder="Your Nickname" t ttarget="placeholder">
           <button type="submit" class="uk-button uk-button-primary uk-button-large" ng-cloak ng-show="main.usernameDirty()" t>Set</button>
-        </span>
-        <div class="dt-color-palette">
-          <a class="dt-color-icon dt-chosen" ng-click="main.togglePalette()" ng-style="{ 'background-color': chosenColor() }"></a>
-          <div class="dt-color-palette" ng-cloak ng-show="main.palette">
-            <a class="dt-color-icon" color-chooser-icon="green"></a>
-            <a class="dt-color-icon" color-chooser-icon="blue"></a>
-            <a class="dt-color-icon" color-chooser-icon="orange"></a>
-            <a class="dt-color-icon" color-chooser-icon="palevioletred"></a>
-            <a class="dt-color-icon" color-chooser-icon="red"></a>
+          <div class="dt-color-palette">
+            <a class="dt-color-icon dt-chosen" ng-click="main.togglePalette()" ng-style="{ 'background-color': chosenColor() }"></a>
+            <div class="dt-color-palette" ng-cloak ng-show="main.palette">
+              <a class="dt-color-icon" color-chooser-icon="green"></a>
+              <a class="dt-color-icon" color-chooser-icon="blue"></a>
+              <a class="dt-color-icon" color-chooser-icon="orange"></a>
+              <a class="dt-color-icon" color-chooser-icon="palevioletred"></a>
+              <a class="dt-color-icon" color-chooser-icon="red"></a>
+            </div>
           </div>
+        </div>
+        <hr class="dt-blank-divider">
+        <div tns="navigation">
+          <span class="uk-button-group">
+            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'day' })" ui-sref-active="uk-active">Day</a>
+            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'week' })" ui-sref-active="uk-active">Week</a>
+            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'month' })" ui-sref-active="uk-active">Month</a>
+          </span>
+          <a ui-sref="newEvent()" ng-cloak ng-show="main.pageCtrlEquals('CalendarCtrl')" class="uk-button uk-button-large" t>New Event</a>
         </div>
       </form>
       <hr class="dt-blank-divider">

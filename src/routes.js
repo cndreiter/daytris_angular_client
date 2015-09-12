@@ -28,6 +28,6 @@ module.exports = ['$urlRouterProvider', '$locationProvider', '$stateProvider',
         controller: 'CalendarCtrl',
         controllerAs: 'calendar'
       })
-    $urlRouterProvider.otherwise('/calendar')
+    $urlRouterProvider.otherwise('/calendar/week')
   }
 ]

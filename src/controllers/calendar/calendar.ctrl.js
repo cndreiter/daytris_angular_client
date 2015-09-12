@@ -13,8 +13,9 @@ angular.module(module.exports, dependencies).controller('CalendarCtrl', [
         'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant',
 function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant) {
   
+  var resolution = $stateParams.resolution
   var view = 'agendaWeek'
-  switch($stateParams.resolution) {
+  switch(resolution) {
     case 'day': view = 'agendaDay'; break
     case 'week': view = 'agendaWeek'; break
     case 'month': view = 'month'; break
@@ -83,9 +84,11 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
       $state.go('event', { eventUrl: event.eventUrl })
     },
     eventRender: function(event, element) {
-      var newHtml = makeParticipants(event)
-      var compiledNewHtml = $compile(newHtml)($scope)
-      element.find('.fc-content').append(compiledNewHtml)
+      if(resolution != 'month') {
+        var newHtml = makeParticipants(event)
+        var compiledNewHtml = $compile(newHtml)($scope)
+        element.find('.fc-content').append(compiledNewHtml)
+      }
     }
   }
   

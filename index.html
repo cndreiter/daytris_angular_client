@@ -46,14 +46,14 @@
     <div class="dt-page">
       <nav class="uk-navbar dt-form-navbar" tns="navigation">
         <ul class="uk-navbar-nav">
-          <li ng-class="{ 'uk-active': main.pageCtrlEquals('CalendarCtrl') }" ui-sref-active="uk-active"><a ui-sref="calendarDefaultView()" t>Calendar</a></li>
-          <li ng-class="{ 'uk-active': main.pageCtrlEquals('EventCtrl') }" ui-sref-active="uk-active"><a ui-sref="newEvent()" t>Event</a></li>
+          <li ng-class="{ 'uk-active': main.pageCtrlEquals('CalendarCtrl') }"><a ui-sref="calendarDefaultView()" t>Calendar</a></li>
+          <li ng-class="{ 'uk-active': main.pageCtrlEquals('EventCtrl') }"><a ui-sref="newEvent()" t>Event</a></li>
         </ul>
       </nav>
       <hr class="dt-blank-divider">
       <form class="uk-form" ng-submit="main.updateUsername()">
         <span tns="navigation">
-          <a href="/event" ng-cloak ng-show="main.pageCtrlMatches('CalendarCtrl')" class="uk-button uk-button-large" t>New Event</a>
+          <a ui-sref="newEvent()" ng-cloak ng-show="main.pageCtrlEquals('CalendarCtrl')" class="uk-button uk-button-large" t>New Event</a>
         </span>
         <span tns="user">
           <input type="text" class="uk-form-large" ng-model="main.username" placeholder="Your Nickname" t ttarget="placeholder">

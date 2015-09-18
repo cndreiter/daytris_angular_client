@@ -6,14 +6,15 @@ var dependencies = [
   require('../events/event.ctrl.js'),
   require('../participants/participant.rest.js'),
   require('../../lib/color.js'),
+  require('../../lib/pubsub.js'),
   'ui.calendar'
 ]
 
 angular.module(module.exports, dependencies).controller('CalendarCtrl', [
-        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant', 't', '$interval',
-function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant,   t,   $interval) {
+        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant', 't', 'pubsub',
+function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant,   t,   pubsub) {
   
-  var intervals = []
+  console.log("CALENDAR.CTRL SCOPE")
   
   var resolution = $stateParams.resolution
   var view = 'agendaWeek'
@@ -24,6 +25,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
   }
   
   var makeParticipants = function(event) {
+    var qEId = "'"+event.id+"'" // quoted event id for use as function parameter
     var s = ''
     if(event.participants) {
       s = event.participants.map(function(participant) {
@@ -34,10 +36,9 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
         var qName = "'"+name+"'" // quoted name for use as function parameter
         var c = participant.color
         var qC = "'"+c+"'" // quoted color for use as function parameter
-        return '<a ng-click="calendar.removeParticipant('+qId+', '+qName+', '+qC+'); $event.stopPropagation()" class="dt-color-icon" color-icon="'+c+'" data-uk-tooltip title="'+name+'"></a>'
+        return '<a ng-click="calendar.removeParticipant('+qId+', '+qEId+', '+qName+', '+qC+'); $event.stopPropagation()" class="dt-color-icon" color-icon="'+c+'" data-uk-tooltip title="'+name+'"></a>'
       }).join('\n')
     }
-    var qEId = "'"+event.id+"'" // quoted event id for use as function parameter
     return '<div class="dt-color-palette">\
 ' + s + '\n\
 <a ng-cloak ng-show="calendar.userOk()" ng-click="calendar.addParticipant('+qEId+'); $event.stopPropagation()" class="dt-add-icon">+</a>\
@@ -59,10 +60,10 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
       uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
     })
   }
-  this.removeParticipant = function(participantId, name, color) {
+  this.removeParticipant = function(participantId, eventId, name, color) {
     var deleteParticipant = function() {
-      Participant.delete({ id: participantId }, function() {
-        uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
+      Participant.delete({ id: participantId, eventId: eventId }, function() {
+        //uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
       })
     }
     if((name != page.username) || (color != page.userColor)) {
@@ -94,6 +95,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
         var compiledNewHtml = $compile(newHtml)($scope)
         element.find('.fc-content').append(compiledNewHtml)
       }
+      pubsub.subscribe('participants', event.id)
     }
   }
   
@@ -119,17 +121,17 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
     })
   }]
   
-  // websocket simulation
+  // websocket update
   var callback = function() {
+    pubsub.unsubscribeAll()
     uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
   }
-  intervals.push($interval(callback, 10000))
-  
+  $scope.$on('pubsub-message', function(message) {
+    console.log('calendar.ctrl: pubsub-message', message)
+    callback()
+  })
   $scope.$on('$destroy', function() {
-    intervals.forEach(function(interval) {
-      console.log("$scope $destroyed => cancel interval", interval)
-      $interval.cancel(interval)
-    })
+    pubsub.unsubscribeAll()
   })
 
 }])

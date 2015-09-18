@@ -6,14 +6,18 @@ var dependencies = [
   require('../comments/comment.rest.js'),
   require('../../lib/date.js'),
   require('../../lib/translator.js'),
+  require('../../lib/pubsub.js'),
   'ui.router'
 ]
 
 var translations = require('./event.translations.js')
 
 angular.module(module.exports, dependencies).controller('EventCtrl', [
-        'page', '$scope', '$state', '$stateParams', 'Event', 'Participant', 'Comment', 'date', 't', '$interval',
-function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Comment,   date,   t,   $interval) {
+        'page', '$scope', '$state', '$stateParams', 'Event', 'Participant', 'Comment', 'date', 't', 'pubsub',
+function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Comment,   date,   t,   pubsub) {
+  
+  console.log("EVENT.CTRL SCOPE")
+  
   var me = this
   var intervals = []
   
@@ -64,7 +68,9 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
       if(me.record) {
         initExisting()
         me.initParticipants()
+        pubsub.subscribe('participants', me.record.id)
         me.initComments()
+        pubsub.subscribe('comments', me.record.id)
       } else {
         $state.go('newEvent')
       }
@@ -76,7 +82,7 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
   
   // PARTICIPANTS
   
-  // websocket simulation
+  // websocket update
   var loadParticipants = function() {
     Participant.get({
       filter: JSON.stringify({
@@ -90,7 +96,7 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
     })
   }
   me.initParticipants = function() {
-    intervals.push($interval(loadParticipants, 10000))
+    // intervals.push($interval(loadParticipants, 10000))
   }
   
   // COMMENTS
@@ -109,20 +115,24 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
     var done = { count: 0 }
     comments.forEach(function(comment) {
       console.log("delete ", comment.id, me.record.url)
-      Comment.delete({ id: comment.id, eventUrl: me.record.url }, function() {
+      Comment.delete({
+        id: comment.id,
+        eventId: me.record.id,
+        eventUrl: me.record.url
+      }, function() {
         done.count += 1
         if(done.count >= n) {
-          me.initComments()
+          //me.initComments()
         }
       })
     })
   }
   var loadComments = function(initial) {
-    if(!initial) {
-      if(me.markedComments().length > 0) {
-        return
-      }
-    }
+    // if(!initial) {
+    //   if(me.markedComments().length > 0) {
+    //     return
+    //   }
+    // }
     Comment.get({
       filter: JSON.stringify({
         eventUrl: me.record.url,
@@ -147,24 +157,23 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
       comment.message = me.comment.message
       comment.$save(function() {
         me.comment = {}
-        me.initComments()
+        //me.initComments()
       })
     }
     loadComments(true)
-    
-    // websocket simulation
-    var callback = function() {
-      loadComments(false)
-    }
-    intervals.push($interval(callback, 7000))
-    
-    $scope.$on('$destroy', function() {
-      intervals.forEach(function(interval) {
-        console.log("$scope $destroyed => cancel interval", interval)
-        $interval.cancel(interval)
-      })
-    })
-    
   }
+  
+  // websocket update
+  var callback = function() {
+    loadComments(false)
+    loadParticipants()
+  }
+  $scope.$on('pubsub-message', function(message) {
+    console.log('event.ctrl: pubsub-message', message)
+    callback()
+  })
+  $scope.$on('$destroy', function() {
+    pubsub.unsubscribeAll()
+  })
   
 }])

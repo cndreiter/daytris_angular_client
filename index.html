@@ -40,6 +40,13 @@
     <!-- daytris -->
     <script type="text/javascript" src="dist/bundle.js"></script>
     
+    <!-- primus, pubsub -->
+    <script type="text/javascript" src="/primus/primus.js"></script>
+    <script type="text/javascript" src="/pubsub-client.js"></script>
+    <script type="text/javascript">
+    PUBSUB_CLIENT = require('pubsub-client')
+    </script>
+    
   </head>
   <body ng-controller="MainCtrl as main">
     <div class="dt-header">

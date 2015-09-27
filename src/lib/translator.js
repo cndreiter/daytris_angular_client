@@ -28,10 +28,15 @@ var translateDirective = ['t', function(t) {
           }
         }
         var getText = function(target) {
+          var text
           switch(target) {
-            case 'text': return element.text()
-            case 'placeholder': return attrs.placeholder
+            case 'text': text = element.text(); break
+            case 'placeholder': text = attrs.placeholder; break
           }
+          if(text.trim) {
+            text = text.trim()
+          }
+          return text
         }
         var setText = function(target, text) {
           switch(target) {
@@ -68,13 +73,16 @@ angular.module(module.exports).directive('tns', function() {
     controller: function($scope) {
       $scope.callbacks = []
       this.registerNamespaceCallback = function(callback) {
+        if($scope.translationNamespace) {
+          callback($scope.translationNamespace)
+        }
         $scope.callbacks.push(callback)
       }
     },
     link: function(scope, element, attrs, ctrl) {
-      var translationNamespace = attrs.tns
+      scope.translationNamespace = attrs.tns
       scope.callbacks.forEach(function(callback) {
-        callback(translationNamespace)
+        callback(scope.translationNamespace)
       })
     }
   }

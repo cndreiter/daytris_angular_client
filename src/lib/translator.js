@@ -71,18 +71,19 @@ angular.module(module.exports).directive('tns', function() {
   return {
     restrict: 'A',
     controller: function($scope) {
-      $scope.callbacks = []
+      var me = this
+      me.callbacks = []
       this.registerNamespaceCallback = function(callback) {
-        if($scope.translationNamespace) {
-          callback($scope.translationNamespace)
+        if(me.translationNamespace) {
+          callback(me.translationNamespace)
         }
-        $scope.callbacks.push(callback)
+        me.callbacks.push(callback)
       }
     },
     link: function(scope, element, attrs, ctrl) {
-      scope.translationNamespace = attrs.tns
-      scope.callbacks.forEach(function(callback) {
-        callback(scope.translationNamespace)
+      ctrl.translationNamespace = attrs.tns
+      ctrl.callbacks.forEach(function(callback) {
+        callback(ctrl.translationNamespace)
       })
     }
   }

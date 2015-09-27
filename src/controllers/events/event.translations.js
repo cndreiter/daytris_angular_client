@@ -1,14 +1,25 @@
 'use strict'
 
 var eventInputs = {
+  // Überschrift
+  'Event of Calendar': 'Termin im Kalender',
+  
   // Bezeichnung
   'Name': 'Bezeichnung',
   'Event Name': 'Bezeichnung des Termins',
+  
+  // Beschreibung
+  'Description': 'Beschreibung',
+  'Event Description': 'Beschreibung des Termins',
+  
+  // Heute
+  'Today': 'Heute',
   
   // Beginn
   'Start': 'Beginn',
   "Event's Start Day": 'Beginn-Tag des Termins',
   "Event's Start Time": 'Beginn-Zeit des Termins',
+  'Single-Day Event (start day = end day)': 'Eintägig (beginnt und endet am selben Tag)',
   
   // Ende
   'End': 'Ende',

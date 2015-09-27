@@ -2,9 +2,14 @@
 
 module.exports = 'controllers/events/daytris-event'
 var dependencies = [
+  require('../../page.js'),
+  require('../calendar/collection.rest.js'),
   require('./event.rest.js'),
   require('../comments/comment.rest.js'),
+  require('../clipboard/clipboard.ctrl.js'),
   require('../../lib/date.js'),
+  require('../../lib/participants.js'),
+  require('../../lib/comments.js'),
   require('../../lib/translator.js'),
   require('../../lib/pubsub.js'),
   'ui.router'
@@ -13,42 +18,68 @@ var dependencies = [
 var translations = require('./event.translations.js')
 
 angular.module(module.exports, dependencies).controller('EventCtrl', [
-        'page', '$scope', '$state', '$stateParams', 'Event', 'Participant', 'Comment', 'date', 't', 'pubsub',
-function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Comment,   date,   t,   pubsub) {
+        'page', '$scope', '$state', '$stateParams', 'Event', 'Collection', 'EventInCollectionFactory', 'Participant', 'participants', 'Comment', 'comments', 'date', 't', 'pubsub',
+function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  EventInCollectionFactory,   Participant,   participants,   Comment,   comments,   date,   t,   pubsub) {
   
   console.log("EVENT.CTRL SCOPE")
   
   var me = this
-  var intervals = []
+  
+  page.collectionUrl = page.collectionUrl || $stateParams.collectionUrl
+  
+  me.participants = participants.forAController($scope.main.showMessage, {})
   
   translations(t) // use translations from event.translations.js
   
-  var initNew = function() {
-    me.record = new Event({})
-    
-    var today = new Date()
-
-    me.record.startDate = date.stringify('date', today)
-    me.record.startTime = '08:00'
-
-    me.record.endDate = date.stringify('date', today)
-    me.record.endTime = '10:00'
-
-    me.submit = function() {
-      me.record.$save(function() {
-        $state.go('event', { eventUrl: me.record.url })
-      })
-      $state.go('calendarDefaultView')
+  $scope.getRecordUrl = function() {
+    if(me.record) {
+      return me.record.url
     }
+  }
+  
+  var initNew = function() {
+    var collectionUrl = $stateParams.collectionUrl
+    Collection.get({
+      filter: JSON.stringify({
+        where: {
+          url: collectionUrl
+        }
+      })
+    }, function(records) {
+      me.collections = records
+      var collectionRecord = records[0]
+      if(collectionRecord) {
+        page.title = page.title || collectionRecord.name
+        
+        var EventInCollection = EventInCollectionFactory(collectionRecord.id)
+        me.record = new EventInCollection({})
+
+        var today = new Date()
+
+        me.record.startDate = date.stringify('date', today)
+        me.record.startTime = '08:00'
+
+        me.record.endDate = date.stringify('date', today)
+        me.record.endTime = '10:00'
+
+        me.submit = function() {
+          me.record.$save(function() {
+            $scope.setCalendarEditMode('grid')
+          })
+        }
+      }
+    })
   }
   
   var initExisting = function() {
     me.submit = function() {
-      Event.update({ id: me.record.id }, me.record )
+      Event.update({ id: me.record.id }, me.record, function() {
+        $scope.setCalendarEditMode('grid')
+      })
     }
     me.delete = function() {
       Event.delete({ id: me.record.id }, function() {
-        $state.go('calendarDefaultView')
+        $scope.setCalendarEditMode('grid')
       })
     }
   }
@@ -59,20 +90,35 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
     Event.get({
       filter: JSON.stringify({
         where: {
-          url: $stateParams.eventUrl
+          url: url
         },
-        include: 'participants'
+        include: ['collections', 'participants']
       })
     }, function(records) {
       me.record = records[0]
       if(me.record) {
+        me.collections = me.record.collections
+        var collectionRecord = me.record.collections[0]
+        if(collectionRecord) {
+          page.collectionUrl = page.collectionUrl || collectionRecord.url
+          page.title = page.title || collectionRecord.name
+        }
         initExisting()
-        me.initParticipants()
-        pubsub.subscribe('participants', me.record.id)
-        me.initComments()
-        pubsub.subscribe('comments', me.record.id)
+        pubsub.subscribe('events/:id/participants', me.record.id)
+        me.comments = comments.forParent({
+          idName: 'eventId',
+          urlName: 'eventUrl',
+          record: me.record
+        }, {
+          load: function(response, initial) {
+            if(initial) {
+              $('.dt-message-input')[0].focus() // FIXME make this independent of the REST response
+            }
+          }
+        })
+        pubsub.subscribe('events/:id/comments', me.record.id)
       } else {
-        $state.go('newEvent')
+        $state.go('calendarDefaultView')
       }
     })
   } else {
@@ -80,9 +126,58 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
     initNew()
   }
   
-  // PARTICIPANTS
+  // DATE INPUTS
   
-  // websocket update
+  me.setStartToday = function() {
+    me.record.startDate = date.stringify('date', new Date())
+  }
+  me.setEndToday = function() {
+    me.startDayIsEndDay = false
+    me.record.endDate = date.stringify('date', new Date())
+  }
+  me.initStartDayIsEndDay = function() {
+    if((!me.record.text) || (me.record.startDate == me.record.endDate)) {
+      me.startDayIsEndDay = true
+      me.updateEndDate()
+    }
+  }
+  
+  me.updateEndDate = function() {
+    if(me.startDayIsEndDay) {
+      me.record.endDate = me.record.startDate
+    } else {
+      if(me.record.startDate.length == me.record.endDate.length) {
+        if(me.record.startDate > me.record.endDate) {
+          me.record.endDate = me.record.startDate
+        }
+      }
+    }
+  }
+  me.updateStartDate = function() {
+    if(me.record.startDate.length == me.record.endDate.length) {
+      if(me.record.endDate < me.record.startDate) {
+        me.record.startDate = me.record.endDate
+      }
+    }
+  }
+  
+  me.updateEndTime = function() {
+    if(me.record.startTime.length == me.record.endTime.length) {
+      if(me.record.startTime > me.record.endTime) {
+        me.record.endTime = me.record.startTime
+      }
+    }
+  }
+  me.updateStartTime = function() {
+    if(me.record.startTime.length == me.record.endTime.length) {
+      if(me.record.endTime < me.record.startTime) {
+        me.record.startTime = me.record.endTime
+      }
+    }
+  }
+  
+  
+  // participants
   var loadParticipants = function() {
     Participant.get({
       filter: JSON.stringify({
@@ -95,83 +190,24 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Participant,   Com
       me.record.participants = response
     })
   }
-  me.initParticipants = function() {
-    // intervals.push($interval(loadParticipants, 10000))
+  
+  // comments
+  $scope.getCommentsObject = function() {
+    return me.comments
+  }
+  $scope.getComments = function() {
+    if(me.comments) {
+      return me.comments.comments
+    }
   }
   
-  // COMMENTS
-  me.comment = {}
-  me.markedComments = function() {
-    if(me.comments) {
-      return me.comments.filter(function(comment) {
-        return comment.marked
-      })
-    }
-    return []
-  }
-  me.deleteMarkedComments = function() {
-    var comments = me.markedComments()
-    var n = comments.length
-    var done = { count: 0 }
-    comments.forEach(function(comment) {
-      console.log("delete ", comment.id, me.record.url)
-      Comment.delete({
-        id: comment.id,
-        eventId: me.record.id,
-        eventUrl: me.record.url
-      }, function() {
-        done.count += 1
-        if(done.count >= n) {
-          //me.initComments()
-        }
-      })
-    })
-  }
-  var loadComments = function(initial) {
-    // if(!initial) {
-    //   if(me.markedComments().length > 0) {
-    //     return
-    //   }
-    // }
-    Comment.get({
-      filter: JSON.stringify({
-        eventUrl: me.record.url,
-        where: {
-          eventId: me.record.id
-        }
-      })
-    }, function(response) {
-      me.comments = response.data
-      if(initial) {
-        $('.dt-message-input')[0].focus() // FIXME make this independent of the REST response
-      }
-    })
-  }
-  me.initComments = function() {
-    me.submitComment = function() {
-      var comment = new Comment({})
-      comment.eventId = me.record.id
-      comment.eventUrl = me.record.url
-      comment.name = page.username
-      comment.color = page.userColor
-      comment.message = me.comment.message
-      comment.$save(function() {
-        me.comment = {}
-        //me.initComments()
-      })
-    }
-    loadComments(true)
-  }
   
   // websocket update
-  var callback = function() {
-    loadComments(false)
-    loadParticipants()
-  }
   $scope.$on('pubsub-message', function(message) {
-    console.log('event.ctrl: pubsub-message', message)
-    callback()
+    me.comments.loadComments(false)
+    loadParticipants()
   })
+  
   $scope.$on('$destroy', function() {
     pubsub.unsubscribeAll()
   })

@@ -1,1 +1,102 @@
-<div ui-calendar="calendar.config" ng-model="calendar.eventSources" calendar="daytrisCalendar"></div>
+<div ng-cloak ng-if="calendarEditMode() != 'new'" ng-include="'views/nav.html'"></div>
+
+<hr class="dt-blank-divider">
+
+<div class="dt-table-grid" ng-controller="CalendarFormCtrl as calendar">
+
+  <div class="dt-table-grid-cell dt-inner-sidebar" ng-cloak ng-if="calendarEditMode() != 'new'">
+    
+    <div tns="navigation">
+      <span class="uk-button-group" ng-cloak ng-if="calendar.record.url">
+        <a class="uk-button" ui-sref="calendarView({ collectionUrl: calendar.record.url, resolution: 'day' })" ui-sref-active="uk-active" t>Day</a>
+        <a class="uk-button" ui-sref="calendarView({ collectionUrl: calendar.record.url, resolution: 'week' })" ui-sref-active="uk-active" t>Week</a>
+        <a class="uk-button" ui-sref="calendarView({ collectionUrl: calendar.record.url, resolution: 'month' })" ui-sref-active="uk-active" t>Month</a>
+      </span>
+      <hr class="dt-blank-divider">
+      <input ng-cloak ng-if="calendarGrid.parentCalendar" type="checkbox"
+             ng-init="calendar.marked = calendarGrid.calendarVisible(calendar.record.id); calendarGrid.onToggleCalendar(calendar.record, calendar.marked)"
+             ng-model="calendar.marked"
+             ng-change="calendarGrid.onToggleCalendar(calendar.record, calendar.marked)"> <span t>Events Visible</span>
+      <hr class="uk-article-divider">
+      <a ng-click="calendarGrid.goToNewEvent()" class="uk-button" t>New Event</a>
+      <hr class="dt-blank-divider">
+      <div ng-cloak ng-show="calendar.record.collections.length">
+        <span t>The new event will appear in the main calendar.</span>
+        <span t>To create an event in a sub-calendar, click one of them:</span>
+      </div>
+      <hr class="dt-blank-divider">
+    </div>
+    
+    <div ng-cloak ng-if="calendarGrid.parentCalendar" ng-repeat="subCalendar in calendar.record.collections">
+      <a class="dt-color-icon dt-inline" ng-style="{ 'background-color': subCalendar.color }"
+             ng-click="subCalendar.marked = !subCalendar.marked; calendarGrid.onToggleCalendar(subCalendar, subCalendar.marked)"></a>
+      <input type="checkbox"
+             ng-init="subCalendar.marked = calendarGrid.calendarVisible(subCalendar.id); calendarGrid.onToggleCalendar(subCalendar, subCalendar.marked)"
+             ng-model="subCalendar.marked"
+             ng-change="calendarGrid.onToggleCalendar(subCalendar, subCalendar.marked)">
+      <a ng-click="calendarGrid.goToNewEvent(subCalendar.url)"><strong><span ng-bind="subCalendar.name"></span></strong></a>
+    </div>
+    
+  </div>
+  
+  <div class="dt-table-grid-cell dt-inner-sidebar" ng-cloak ng-if="calendarEditMode() == 'new'" tns="calendarInputs">
+    <span t>Create a new Calendar</span>
+  </div>
+  
+  <div class="dt-table-grid-cell dt-table-grid-center-cell dt-calendar-cell" tns="subCalendarInputs">
+    
+    <div ng-cloak ng-if="calendarEditMode() != 'grid'">
+      <div ng-cloak ng-if="calendarEditMode() != 'children'">
+        <div ng-include="'views/calendar.form.html'"></div>
+        <hr ng-cloak ng-show="calendar.sortedAlternativeEvents" class="uk-article-divider">
+        <div ng-include="'views/alternatives.html'"></div>
+        <hr class="uk-article-divider">
+        <form class="uk-form uk-form-horizontal" ng-submit="calendar.comments.submit()" tns="commentInputs">
+          <div class="uk-form-row" ng-cloak ng-show="calendar.comments.comments.length" ng-include="'views/comments.html'"></div>
+          <div class="uk-form-row" ng-include="'views/comments.inputs.html'"></div>
+        </form>
+      </div>
+      <div ng-cloak ng-if="calendarEditMode() == 'children'">
+        <h2><strong><span t>Sub-Calendars of Calendar</span><br>&quot;<span ng-bind="calendar.record.name"></span>&quot;</strong></h2>
+      </div>
+      <div ng-cloak ng-if="calendar.record && (calendarEditMode() == 'children')" ng-controller="SubCalendarFormsCtrl">
+        <div ng-if="calendar.record.collections.length">
+          <hr class="uk-article-divider">
+          <h2 t>Existing Sub-Calendars</h2>
+          <div ng-repeat="subCalendar in calendar.record.collections" ng-controller="CalendarFormCtrl as calendar" ng-show="!calendar.deleted">
+            <hr class="uk-article-divider">
+            <div ng-cloak ng-if="parentCalendar.editedSubCalendarId == calendar.record.id" ng-include="'views/calendar.form.html'"></div>
+            <div ng-cloak ng-if="parentCalendar.editedSubCalendarId != calendar.record.id" ng-include="'views/calendar.readonly-form.html'"></div>
+            <hr ng-cloak ng-show="calendar.sortedAlternativeEvents" class="dt-blank-divider">
+            <div ng-include="'views/alternatives.html'"></div>
+            <form class="uk-form uk-form-horizontal" ng-submit="calendar.comments.submit()" tns="commentInputs">
+              <hr ng-cloak ng-if="calendar.comments.comments.length" class="dt-blank-divider">
+              <div class="uk-form-row" ng-cloak ng-show="calendar.comments.comments.length" ng-include="'views/comments.html'"></div>
+              <div class="uk-form-row" ng-include="'views/comments.inputs.html'"></div>
+            </form>
+          </div>
+        </div>
+        <hr class="uk-article-divider">
+        <h2 t>New Sub-Calendar</h2>
+        <h3 t>Connect an existing Calendar</h3>
+        <form class="uk-form uk-form-horizontal" ng-submit="calendar.connectCandidate.submit()" tns="calendarConnectInputs">
+          <div class="uk-form-row">
+            <label class="uk-form-label">Paste the Calendar's URL</label>
+            <input class="uk-form-width-large" type="text" ng-model="calendar.connectCandidate.pastedUrl" ng-change="calendar.connectCandidate.getUrlEndingFromPastedUrl()" placeholder="Existing Calendar's URL">
+          </div>
+          <div ng-cloak ng-show="calendar.connectCandidate.pastedUrl" class="uk-form-row">
+            <button type="submit" class="uk-button uk-button-primary">Connect /<span ng-bind="calendar.connectCandidate.url"></span></button>
+          </div>
+        </form>
+        <h3 t>Create a new Calendar</h3>
+        <div ng-include="'views/calendar.form.html'" ng-controller="CalendarFormCtrl as calendar"></div>
+      </div>
+    </div>
+    
+    <div ng-cloak ng-show="calendarEditMode() == 'grid'">
+      <div ui-calendar="calendarGrid.config" ng-model="calendarGrid.eventSources" calendar="daytrisCalendar"></div>
+    </div>
+
+  </div>
+
+</div>

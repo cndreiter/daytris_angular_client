@@ -6,7 +6,9 @@ var dependencies = [
 ]
 
 angular.module(module.exports, dependencies).factory('page', ['$cookies', function($cookies) {
-  var page = {}
+  var page = {
+    defaultTitle: 'Daytris Social Organizer'
+  }
   
   // initialization: retrieve user cookie
   var userCookie = $cookies.getObject('anonymousUser') || {}
@@ -27,6 +29,22 @@ angular.module(module.exports, dependencies).factory('page', ['$cookies', functi
   page.setUserColor = function(color) {
     page.userColor = color
     page.saveUser()
+  }
+  
+  page.retrieveVisibleCalendars = function(id) {
+    return $cookies.getObject('calendars/visible/' + id) || {}
+  }
+  page.saveVisibleCalendars = function(id, visibleCalendars) {
+    $cookies.putObject('calendars/visible/' + id, visibleCalendars)
+  }
+  
+  page.makeFullUrl = function(tail) {
+    var l = window.location
+    var windowUrl = l.protocol + '//' + l.host + l.pathname
+    var parts = windowUrl.split('/')
+    var prefix = parts.slice(0, parts.length - 1).join('/')
+    var fullUrl = prefix + '/' + tail
+    return fullUrl
   }
   
   return page

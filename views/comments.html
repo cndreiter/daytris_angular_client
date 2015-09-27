@@ -1,0 +1,8 @@
+<div class="uk-form-row" ng-repeat="comment in getComments()">
+  <label class="uk-form-label dt-comment-author">
+    <span class="dt-color-icon dt-inline" ng-style="{ 'background-color': comment.color }"></span>
+    <span ng-bind="comment.name"></span>
+    <input type="checkbox" ng-model="comment.marked">
+  </label>
+  <div class="dt-comment-message" ng-bind="comment.message"></div>
+</div>

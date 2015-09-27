@@ -10,24 +10,42 @@ module.exports = ['$urlRouterProvider', '$locationProvider', '$stateProvider',
         controller: 'EventCtrl',
         controllerAs: 'event'
       }).
-      state('newEvent', {
-        url: '/event',
+      state('newCalendarEvent', {
+        url: '/calendars/:collectionUrl/event',
         templateUrl: 'views/event.html',
         controller: 'EventCtrl',
         controllerAs: 'event'
       }).
-      state('calendarView', {
-        url: '/calendar/:resolution',
-        templateUrl: 'views/calendar.html',
-        controller: 'CalendarCtrl',
-        controllerAs: 'calendar'
+      state('calendarEvent', {
+        url: '/calendars/:collectionUrl/events/:eventUrl',
+        templateUrl: 'views/event.html',
+        controller: 'EventCtrl',
+        controllerAs: 'event'
       }).
       state('calendarDefaultView', {
         url: '/calendar',
         templateUrl: 'views/calendar.html',
         controller: 'CalendarCtrl',
-        controllerAs: 'calendar'
+        controllerAs: 'calendarGrid'
+      }).
+      state('calendar', {
+        url: '/calendars/:collectionUrl',
+        templateUrl: 'views/calendar.html',
+        controller: 'CalendarCtrl',
+        controllerAs: 'calendarGrid'
+      }).
+      state('calendarView', {
+        url: '/calendars/:collectionUrl/:resolution',
+        templateUrl: 'views/calendar.html',
+        controller: 'CalendarCtrl',
+        controllerAs: 'calendarGrid'
+      }).
+      state('newCalendar', {
+        url: '/calendar',
+        templateUrl: 'views/calendar.html',
+        controller: 'CalendarCtrl',
+        controllerAs: 'calendarGrid'
       })
-    $urlRouterProvider.otherwise('/calendar/week')
+    $urlRouterProvider.otherwise('/calendar')
   }
 ]

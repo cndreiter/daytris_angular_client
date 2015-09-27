@@ -7,35 +7,41 @@ angular.module(module.exports, dependencies).factory('pubsub', ['$rootScope', fu
   var pubsub = {}
   
   var knownSubscriptions = {}
-
+  
+  var subscriptionIdString = function(topic, recordId) {
+    // replace :id/:recordId by recordId
+    return topic.replace(':id', recordId).replace(':recordId', recordId)
+  }
+  
   var init = function() {
     // this function will be called whenever Primus re-connects (re-opens)
     Object.keys(knownSubscriptions).forEach(function(topic) {
       var topicObject = knownSubscriptions[topic]
-      Object.keys(topicObject).forEach(function(parentId) {
-        if(knownSubscriptions[topic][parentId]) {
-          var subscription = topic + '/' + parentId
+      Object.keys(topicObject).forEach(function(recordId) {
+        if(knownSubscriptions[topic][recordId]) {
+          var subscription = subscriptionIdString(topic, recordId)
           console.log('pubsub: re-subscription after re-connect', subscription)
           pubsub.client.subscribe(subscription)
         }
       })
     })
     pubsub.client.on('message', function(topic, msg) {
-      console.log('topic, message ', topic, msg)
-      var parts = topic.split('/');
+      var message = msg.toString() // e.g. "changed"
+      var parts = topic.split('/')
       if(parts.length == 2) {
-        if(parts[0] == 'comments') {
-          if(msg.toString() == 'changed') {
-            // parts[1] is the comment list's eventId
-            $rootScope.$broadcast('pubsub-message', 'comments/' + parts[1] + ' changed')
-          }
-        }
-        if(parts[0] == 'participants') {
-          if(msg.toString() == 'changed') {
-            // parts[1] is the participant list's eventId
-            $rootScope.$broadcast('pubsub-message', 'participants/' + parts[1] + ' changed')
-          }
-        }
+        $rootScope.$broadcast('pubsub-message', {
+          collection: parts[0],
+          id: parts[1],
+          change: message
+        })
+      }
+      if(parts.length == 3) {
+        $rootScope.$broadcast('pubsub-message', {
+          parentCollection: parts[0],
+          parentId: parts[1],
+          collection: parts[2],
+          change: message
+        })
       }
     })
   }
@@ -47,43 +53,39 @@ angular.module(module.exports, dependencies).factory('pubsub', ['$rootScope', fu
 
   createClient()
   
-  pubsub.subscribe = function(topic, parentId) {
+  pubsub.subscribe = function(topic, recordId) {
     // e.g. topic = 'participants'
-    // e.g. parentId = 1
+    // e.g. recordId = 1
     if(!knownSubscriptions[topic]) {
       knownSubscriptions[topic] = {}
     }
-    if(knownSubscriptions[topic][parentId]) {
-      console.log('re-subscription of subscribed topic+parentId', topic, parentId)
+    if(knownSubscriptions[topic][recordId]) {
+      //console.log('re-subscription of subscribed topic+recordId', topic, recordId)
       return;
     }
-    knownSubscriptions[topic][parentId] = true
-    var subscription = topic + '/' + parentId
-    console.log('pubsub.subscribe', subscription)
+    knownSubscriptions[topic][recordId] = true
+    var subscription = subscriptionIdString(topic, recordId)
     pubsub.client.subscribe(subscription)
   }
   
-  pubsub.unsubscribe = function(topic, parentId) {
+  pubsub.unsubscribe = function(topic, recordId) {
     if(knownSubscriptions[topic]) {
-      knownSubscriptions[topic][parentId] = false
+      knownSubscriptions[topic][recordId] = false
     }
-    var subscription = topic + '/' + parentId
-    console.log('pubsub.unsubscribe', subscription)
+    var subscription = subscriptionIdString(topic, recordId)
     pubsub.client.unsubscribe(subscription)
   }
   
   pubsub.unsubscribeTopic = function(topic) {
-    console.log('pubsub.unsubscribeTopic', topic)
     var topicObject = knownSubscriptions[topic]
     if(topicObject) {
-      Object.keys(topicObject).forEach(function(parentId) {
-        pubsub.unsubscribe(topic, parentId)
+      Object.keys(topicObject).forEach(function(recordId) {
+        pubsub.unsubscribe(topic, recordId)
       })
     }
   }
   
   pubsub.unsubscribeAll = function() {
-    console.log('pubsub.unsubscribeAll')
     Object.keys(knownSubscriptions).forEach(function(topic) {
       pubsub.unsubscribeTopic(topic)
     })

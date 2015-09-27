@@ -4,17 +4,24 @@ module.exports = 'controllers/calendar/daytris-calendar'
 var dependencies = [
   require('../../page.js'),
   require('../events/event.ctrl.js'),
-  require('../participants/participant.rest.js'),
+  require('./participants.dom.js'),
   require('../../lib/color.js'),
+  require('../../lib/participants.js'),
   require('../../lib/pubsub.js'),
   'ui.calendar'
 ]
 
 angular.module(module.exports, dependencies).controller('CalendarCtrl', [
-        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'Participant', 't', 'pubsub',
-function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   Participant,   t,   pubsub) {
+        'page', '$scope', '$compile', '$state', '$stateParams', 'uiCalendarConfig', 'Event', 'EventInCollectionFactory', 'participants', 'participantsDom', 't', 'pubsub',
+function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfig,   Event,   EventInCollectionFactory,   participants,   participantsDom,   t,   pubsub) {
   
-  console.log("CALENDAR.CTRL SCOPE")
+  var me = this
+  
+  page.collectionUrl = $stateParams.collectionUrl
+  
+  me.reloadedEvents = {} // reloaded events contain up-to-date participant lists
+  
+  me.subCalendars = {}
   
   var resolution = $stateParams.resolution
   var view = 'agendaWeek'
@@ -24,65 +31,17 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
     case 'month': view = 'month'; break
   }
   
-  var makeParticipants = function(event) {
-    var qEId = "'"+event.id+"'" // quoted event id for use as function parameter
-    var s = ''
-    if(event.participants) {
-      s = event.participants.map(function(participant) {
-        // FIXME use $sanitize to make name and color safe
-        var id = participant.id
-        var qId = "'"+id+"'" // quoted id for use as function parameter
-        var name = participant.name
-        var qName = "'"+name+"'" // quoted name for use as function parameter
-        var c = participant.color
-        var qC = "'"+c+"'" // quoted color for use as function parameter
-        return '<a ng-click="calendar.removeParticipant('+qId+', '+qEId+', '+qName+', '+qC+'); $event.stopPropagation()" class="dt-color-icon" color-icon="'+c+'" data-uk-tooltip title="'+name+'"></a>'
-      }).join('\n')
+  me.participants = participants.forAController($scope.main.showMessage, {
+    // listeners
+    'add': function() {
+      //uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
+    },
+    'delete': function() {
+      //uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
     }
-    return '<div class="dt-color-palette">\
-' + s + '\n\
-<a ng-cloak ng-show="calendar.userOk()" ng-click="calendar.addParticipant('+qEId+'); $event.stopPropagation()" class="dt-add-icon">+</a>\
-</div>'
-  }
+  })
   
-  this.userOk = function() {
-    // test if the user can be used as valid participant
-    return page.username && page.userColor
-  }
-  
-  this.addParticipant = function(eventId) {
-    var record = new Participant({})
-    record.name = page.username
-    record.color = page.userColor
-    record.participation = 'yes'
-    record.eventId = eventId
-    record.$save(function() {
-      uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
-    })
-  }
-  this.removeParticipant = function(participantId, eventId, name, color) {
-    var deleteParticipant = function() {
-      Participant.delete({ id: participantId, eventId: eventId }, function() {
-        //uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
-      })
-    }
-    if((name != page.username) || (color != page.userColor)) {
-      // configure modal
-      var mt = t.allTranslations.messageModal
-      $scope.main.messageModal = {
-        message: mt['Remove participant '] + name + mt['?'],
-        okButtonText: mt['Yes, remove participant'],
-        cancelButtonText: mt['Cancel'],
-        okFunc: deleteParticipant
-      }
-      // show modal
-      UIkit.modal('#messageModal').show()
-    } else {
-      deleteParticipant()
-    }
-  }
-  
-  this.config = {
+  me.config = {
     lang: 'de',
     defaultView: view,
     columnFormat: 'dd D.M.',
@@ -91,47 +50,152 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
     },
     eventRender: function(event, element) {
       if(resolution != 'month') {
-        var newHtml = makeParticipants(event)
+        console.log('reloaded event', event.id, me.reloadedEvents[event.id])
+        var newHtml = participantsDom.makeParticipants(me.reloadedEvents[event.id] || event, 'calendarGrid.participants')
         var compiledNewHtml = $compile(newHtml)($scope)
         element.find('.fc-content').append(compiledNewHtml)
       }
-      pubsub.subscribe('participants', event.id)
+      pubsub.subscribe('events/:id/participants', event.id)
+    },
+    eventAfterAllRender: function() {
+      if(!me.gotoDateDone) {
+        if(me.foremostEventTime) {
+          me.gotoDateDone = true
+          uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('gotoDate', me.foremostEventTime)
+        }
+      }
     }
   }
   
-  var moment = $.fullCalendar.moment;
+  var getEventsFunc = function(calendarId) {
+    return function(start, end, timezone, callback) {
+      var EventInCollection = EventInCollectionFactory(calendarId)
+      EventInCollection.get({
+        filter: JSON.stringify({
+          include: 'participants'
+        })
+      }, function(records) {
+        var mapped = records.map(function(record) {
+          var startDate = moment(record.startDate + 'T' + record.startTime).toDate()
+          var endDate = moment(record.endDate + 'T' + record.endTime).toDate()
+          var time = startDate.getTime()
+          if(me.foremostEventTime) {
+            if(time < me.foremostEventTime) {
+              me.foremostEventTime = time
+            }
+          } else {
+            me.foremostEventTime = time
+          }
+          return {
+            id: record.id,
+            eventUrl: record.url,
+            title: record.text,
+            start: startDate,
+            end: endDate,
+            participants: record.participants
+          }
+        })
+        callback(mapped)
+      })
+    }
+  }
   
-  this.eventSources = [function(start, end, timezone, callback) {
+  me.eventSources = []
+  me.visibleCalendars = {}
+  
+  $scope.setParentCalendar = function(calendar) {
+    me.visibleCalendars = page.retrieveVisibleCalendars(calendar.id)
+    me.parentCalendar = calendar
+  }
+  
+  $scope.addGridEventSource = function(calendar, keepExisting) {
+    if(keepExisting) {
+      if(me.subCalendars['' + calendar.id]) {
+        // already exists => keep it => do nothing and return
+        return
+      }
+    } else {
+      $scope.removeGridEventSource(calendar.id)
+    }
+    var uid = new Date().getMilliseconds() // uid: used for debugging purposes only
+    me.subCalendars['' + calendar.id] = {
+      events: getEventsFunc(calendar.id),
+      color: (calendar.color || 'white'),
+      uid: uid
+    }
+    var eventSource = me.subCalendars['' + calendar.id]
+    uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('addEventSource', eventSource)
+    //uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
+  }
+  
+  $scope.removeGridEventSource = function(calendarId) {
+    if(calendarId && me.subCalendars['' + calendarId]) {
+      var eventSource = me.subCalendars['' + calendarId]
+      uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('removeEventSource', eventSource)
+      if($scope.calendarEditMode() == 'grid') {
+        me.refetchEvents()
+      }
+      delete me.subCalendars['' + calendarId]
+    }
+  }
+  
+  me.onToggleCalendar = function(calendar, marked) {
+    if(marked) {
+      $scope.addGridEventSource(calendar, true)
+      me.visibleCalendars[calendar.id] = true
+    } else {
+      $scope.removeGridEventSource(calendar.id)
+      me.visibleCalendars[calendar.id] = false
+    }
+    if(me.parentCalendar && me.parentCalendar.id) {
+      page.saveVisibleCalendars(me.parentCalendar.id, me.visibleCalendars)
+    }
+  }
+  
+  me.calendarVisible = function(calendarId) {
+    return (typeof me.visibleCalendars[calendarId] === 'undefined')? true : me.visibleCalendars[calendarId]
+  }
+  
+  me.goToNewEvent = function(collectionUrl) {
+    var url = collectionUrl || $stateParams.collectionUrl
+    if(url) {
+      $state.go('newCalendarEvent', { collectionUrl: url })
+    }
+  }
+  
+  $scope.$on('edit-mode-grid', function() {
+    me.refetchEvents()
+  })
+  
+  me.refetchEvents = function() {
+    if(uiCalendarConfig.calendars && uiCalendarConfig.calendars.daytrisCalendar) {
+      uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
+    }
+  }
+  
+  // websocket update
+  $scope.$on('pubsub-message', function(event, message) {
+    var eventId = message.parentId
     Event.get({
       filter: JSON.stringify({
+        where: { id: eventId },
         include: 'participants'
       })
     }, function(records) {
-      var mapped = records.map(function(record) {
-        return {
-          id: record.id,
-          eventUrl: record.url,
-          title: record.text,
-          start: moment(record.startDate + 'T' + record.startTime).toDate(),
-          end: moment(record.endDate + 'T' + record.endTime).toDate(),
-          participants: record.participants
+      var record = records[0]
+      if(record) {
+        if(record.id == eventId) {
+          me.reloadedEvents[eventId] = record
+          uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('rerenderEvents')
         }
-      })
-      callback(mapped)
+      }
     })
-  }]
-  
-  // websocket update
-  var callback = function() {
-    pubsub.unsubscribeAll()
-    uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
-  }
-  $scope.$on('pubsub-message', function(message) {
-    console.log('calendar.ctrl: pubsub-message', message)
-    callback()
+    
   })
+  
   $scope.$on('$destroy', function() {
     pubsub.unsubscribeAll()
+    $scope.setCalendarEditMode(null)
   })
-
+  
 }])

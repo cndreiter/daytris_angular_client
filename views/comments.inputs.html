@@ -1,0 +1,7 @@
+<div class="uk-form-row" ng-cloak ng-show="getCommentsObject().markedComments().length">
+  <button type="button" class="uk-button" ng-click="getCommentsObject().deleteMarkedComments()">Delete selected comments</button>
+</div>
+<div class="uk-form-row">
+  <label class="uk-form-label" t>Message</label>
+  <input class="uk-form-width-large dt-message-input" type="text" ng-model="getCommentsObject().comment.message" placeholder="Your Message" t ttarget="placeholder">
+</div>

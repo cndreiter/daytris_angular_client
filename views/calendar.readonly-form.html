@@ -1,0 +1,13 @@
+<div tns="calendarReadOnly">
+  <button ng-cloak ng-if="calendar.record.id" type="button" class="uk-button uk-button-mini" ng-click="calendar.showEditForm()" t>Edit</button>
+  <button ng-cloak ng-if="parentCalendar" type="button" class="uk-button uk-button-mini" ng-click="calendar.disconnect()" t>Disconnect</button>
+  <span class="dt-color-icon dt-inline" ng-style="{ 'background-color': calendar.record.color }"></span>
+  <strong><span ng-bind="calendar.record.name"></span></strong><br>
+  <span ng-controller="ClipboardCtrl" tns="calendarInputs">
+    <span class="dt-url" ng-bind="makeFullUrl(calendar.record.url)"></span>
+    <button type="button" class="uk-button uk-button-mini" ui-zeroclip zeroclip-model="makeFullUrl(calendar.record.url)" zeroclip-copied="copied=true">
+      <span ng-cloak ng-show="!copied" t>Copy URL</span>
+      <span ng-cloak ng-show="copied" t>Copy URL again</span>
+    </button>
+  </span>
+</div>

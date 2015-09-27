@@ -37,8 +37,16 @@
     <script type="text/javascript" src="bower_components/uikit/js/components/timepicker.js"></script>
     <script type="text/javascript" src="bower_components/uikit/js/components/tooltip.js"></script>
     
-    <!-- daytris -->
-    <script type="text/javascript" src="dist/bundle.js"></script>
+    <!-- angular-elastic -->
+    <script type="text/javascript" src="bower_components/angular-elastic/elastic.js"></script>
+    
+    <!-- angular-zeroclipboard -->
+    <script type="text/javascript" src="bower_components/zeroclipboard/dist/ZeroClipboard.js"></script>
+    <script type="text/javascript" src="bower_components/angular-zeroclipboard/src/angular-zeroclipboard.js"></script>
+    
+    <!-- angular-chart.js -->
+    <!-- <script type="text/javascript" src="bower_components/Chart.js/Chart.js"></script>
+    <script type="text/javascript" src="bower_components/angular-chart.js/dist/angular-chart.js"></script> -->
     
     <!-- primus, pubsub -->
     <script type="text/javascript" src="/primus/primus.js"></script>
@@ -47,10 +55,31 @@
     PUBSUB_CLIENT = require('pubsub-client')
     </script>
     
+    <!-- daytris -->
+    <script type="text/javascript" src="dist/bundle.js"></script>
+    
   </head>
   <body ng-controller="MainCtrl as main">
-    <div class="dt-header">
-      <h1 class="dt-heading">Daytris Social Organizer</h1>
+    <div class="dt-header" tns="navigation">
+      <h1 class="dt-header-element dt-heading" ng-bind="('Daytris / ' + getPage().title) || getPage().defaultTitle">Daytris Social Organizer</h1>
+      <div class="dt-header-element">
+        <form class="uk-form" ng-submit="main.updateUsername()">
+          <a class="uk-button uk-button-large" ui-sref="newCalendar()" t>New Calendar</a>
+          <span tns="user">
+            &nbsp;|
+            <span ng-cloak ng-if="!main.username" t>Set your name:</span>
+            <span ng-cloak ng-if="main.username" t>My name is</span>
+            <input type="text" class="uk-form-large" ng-model="main.username" placeholder="Your Nickname" t ttarget="placeholder">
+            <button type="submit" class="uk-button uk-button-primary uk-button-large" ng-cloak ng-show="main.usernameDirty()" t>Set</button>
+            <div class="dt-color-palette">
+              <a class="dt-color-icon dt-chosen" ng-click="main.togglePalette()" ng-style="{ 'background-color': chosenColor() }"></a>
+              <div class="dt-color-palette" ng-cloak ng-show="main.palette">
+                <span ng-repeat="color in niceColors"><a class="dt-color-icon" color-chooser-icon="{{color}}"></a> </span>
+              </div>
+            </div>
+          </span>
+        </form>
+      </div>
     </div>
     
     <div id="messageModal" class="uk-modal" tns="messageModal">
@@ -58,47 +87,19 @@
         <div ng-bind="main.messageModal.message"></div>
         <hr class="dt-blank-divider">
         <div>
-          <button class="uk-button uk-modal-close" ng-click="main.messageModal.okFunc()" ng-bind="main.messageModal.okButtonText" t>OK</button>
-          <button class="uk-button uk-modal-close" ng-bind="main.messageModal.cancelButtonText" t>Cancel</button>
+          <button class="uk-button uk-modal-close" ng-click="main.messageModal.okFunc()" ng-bind="main.messageModal.okButtonText">OK</button>
+          <button class="uk-button uk-modal-close" ng-bind="main.messageModal.cancelButtonText">Cancel</button>
         </div>
       </div>
     </div>
     
-    <div class="dt-page">
-      <nav class="uk-navbar dt-form-navbar" tns="navigation">
-        <ul class="uk-navbar-nav">
-          <li ng-class="{ 'uk-active': main.pageCtrlEquals('CalendarCtrl') }"><a ui-sref="calendarDefaultView()" t>Calendar</a></li>
-          <li ng-class="{ 'uk-active': main.pageCtrlEquals('EventCtrl') }"><a ui-sref="newEvent()" t>Event</a></li>
-        </ul>
-      </nav>
-      <hr class="dt-blank-divider">
-      <form class="uk-form" ng-submit="main.updateUsername()">
-        <div tns="user">
-          <input type="text" class="uk-form-large" ng-model="main.username" placeholder="Your Nickname" t ttarget="placeholder">
-          <button type="submit" class="uk-button uk-button-primary uk-button-large" ng-cloak ng-show="main.usernameDirty()" t>Set</button>
-          <div class="dt-color-palette">
-            <a class="dt-color-icon dt-chosen" ng-click="main.togglePalette()" ng-style="{ 'background-color': chosenColor() }"></a>
-            <div class="dt-color-palette" ng-cloak ng-show="main.palette">
-              <a class="dt-color-icon" color-chooser-icon="green"></a>
-              <a class="dt-color-icon" color-chooser-icon="blue"></a>
-              <a class="dt-color-icon" color-chooser-icon="orange"></a>
-              <a class="dt-color-icon" color-chooser-icon="palevioletred"></a>
-              <a class="dt-color-icon" color-chooser-icon="red"></a>
-            </div>
-          </div>
-        </div>
-        <hr class="dt-blank-divider">
-        <div tns="navigation">
-          <span class="uk-button-group">
-            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'day' })" ui-sref-active="uk-active" t>Day</a>
-            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'week' })" ui-sref-active="uk-active" t>Week</a>
-            <a class="uk-button uk-button-large" ui-sref="calendarView({ resolution: 'month' })" ui-sref-active="uk-active" t>Month</a>
-          </span>
-          <a ui-sref="newEvent()" ng-cloak ng-show="main.pageCtrlEquals('CalendarCtrl')" class="uk-button uk-button-large" t>New Event</a>
-        </div>
-      </form>
-      <hr class="dt-blank-divider">
-      <div ui-view></div>
+    <div class="dt-page dt-table-grid">
+      <div class="dt-table-grid-cell dt-outer-sidebar">
+        <a ng-click="main.logoClick()"><img alt="Daytris Logo" src="images/daytris.jpg"></a>
+      </div>
+      <div class="dt-table-grid-cell dt-table-grid-center-cell">
+        <div ui-view></div>
+      </div>
     </div>
   </body>
 </html>

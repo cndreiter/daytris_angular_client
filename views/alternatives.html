@@ -1,0 +1,15 @@
+<span ng-repeat="event in calendar.sortedAlternativeEvents" tns="alternatives">
+  <a ui-sref="calendarEvent({ collectionUrl: calendar.record.url, eventUrl: event.url })" class="dt-color-icon dt-number-icon" ng-class="{ 'dt-chosen': (!$index) }" color-icon="{{calendar.record.color || 'gray'}}" ng-bind="event.participants.length"></a>
+  <div class="dt-icon-meta-text">
+    <span ng-bind="event.text" class="dt-heading"></span><br>
+    <span ng-bind="event.startDate"></span> <span ng-bind="event.startTime"></span><br>
+    <span ng-bind="event.endDate"></span> <span ng-bind="event.endTime"></span>
+  </div>
+</span>
+<div ng-repeat="event in calendar.sortedAlternativeEvents" ng-controller="AlternativeEventsCtrl" tns="alternatives">
+  <hr class="dt-blank-divider">
+  <div ng-cloak ng-show="event.comments.length" class="uk-form">
+    <h4 class="uk-form-row"><span t>Comments of</span> <span ng-bind="event.text"></span></h4>
+    <div class="uk-form-row" ng-include="'views/comments.space-saving.html'"></div>
+  </div>
+</div>

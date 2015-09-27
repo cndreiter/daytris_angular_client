@@ -17,9 +17,11 @@
   "dependencies": {
     "angular": "~1.4.5",
     "angular-cookies": "~1.4.5",
+    "angular-elastic": "~2.5.0",
     "angular-resource": "~1.4.5",
     "angular-ui-calendar": "~1.0.1",
     "angular-ui-router": "~0.2.15",
+    "angular-zeroclipboard": "~0.7.0",
     "uikit": "~2.22.0"
   },
   "resolutions": {

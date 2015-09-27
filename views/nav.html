@@ -1,0 +1,8 @@
+<nav class="uk-navbar dt-form-navbar" tns="navigation">
+  <ul class="uk-navbar-nav">
+    <li ng-class="{ 'uk-active': (calendarEditMode() == 'grid'    )}"><a ng-click="setCalendarEditMode('grid')"     t>Calendar Grid</a></li>
+    <li ng-class="{ 'uk-active': (calendarEditMode() == 'form'    )}"><a ng-click="setCalendarEditMode('form')"     t>Calendar Details</a></li>
+    <li ng-class="{ 'uk-active': (calendarEditMode() == 'children')}"><a ng-click="setCalendarEditMode('children')" t>Sub-Calendars</a></li>
+    <li ng-class="{ 'uk-active': pageCtrlEquals('EventCtrl') }"><a ui-sref="newCalendarEvent({ collectionUrl: getPage().collectionUrl })" t>Event</a></li>
+  </ul>
+</nav>

@@ -10,10 +10,29 @@ var dependencies = [
 var translations = require('./main.translations.js')
 
 angular.module(module.exports, dependencies).controller('MainCtrl', [
-        'page', '$scope', '$state', 't',
-function(page,   $scope,   $state,   t) {
+        'page', '$scope', '$state', '$stateParams', 'colors', 't',
+function(page,   $scope,   $state,   $stateParams ,  colors,   t) {
   var me = this
   
+  me.showMessage = function(message) {
+    /*
+     * example for message variable:
+     *
+     *    var mt = t.allTranslations.messageModal
+     *    message = {
+     *      message: mt['Remove participant '] + name + mt['?'],
+     *      okButtonText: mt['Yes, remove participant'],
+     *      cancelButtonText: mt['Cancel'],
+     *      okFunc: deleteParticipant
+     *    }
+     */
+    //$scope.main.messageModal = message
+    me.messageModal = message
+    UIkit.modal('#messageModal').show()
+  }
+  
+  $scope.niceColors = colors.niceColors
+  $scope.nicePaleColors = colors.nicePaleColors
   translations(t) // use translations from main.translations.js
   
   $scope.getPageControllerName = function() {
@@ -24,11 +43,57 @@ function(page,   $scope,   $state,   t) {
     }
   }
   
-  me.pageCtrlEquals = function(controllerName) {
+  $scope.pageCtrlEquals = function(controllerName) {
     var pageControllerName = me.pageControllerName || ''
     var result = pageControllerName == controllerName
     return result
   }
+  
+  $scope.getPage = function() {
+    return page
+  }
+  
+  $scope.existingCalendarEditMode = null
+  $scope.calendarEditMode = function() {
+    if($stateParams.collectionUrl) {
+      return $scope.existingCalendarEditMode
+    } else {
+      return 'new'
+    }
+  }
+  $scope.setCalendarEditMode = function(mode) {
+    var goToCalendar = function() {
+      if(!$scope.pageCtrlEquals('CalendarCtrl')) {
+        $state.go('calendar', { collectionUrl: page.collectionUrl });
+      }
+    }
+    if(!mode) {
+      $scope.existingCalendarEditMode = null;
+    } else {
+      switch(mode) {
+        case 'new':
+          $state.go('newCalendar')
+          $scope.$broadcast('edit-mode-new')
+          break
+        case 'form':
+          goToCalendar()
+          $scope.existingCalendarEditMode = 'form'
+          $scope.$broadcast('edit-mode-form')
+          break
+        case 'grid':
+          goToCalendar()
+          $scope.existingCalendarEditMode = 'grid'
+          $scope.$broadcast('edit-mode-grid')
+          break
+        case 'children':
+          goToCalendar()
+          $scope.existingCalendarEditMode = 'children'
+          $scope.$broadcast('edit-mode-children')
+          break
+      }
+    }
+  }
+  
   
   $scope.$on('$locationChangeSuccess', function(event) {
     var watcher = {}
@@ -36,6 +101,9 @@ function(page,   $scope,   $state,   t) {
       if(value) {
         watcher.unwatch()
         me.pageControllerName = $scope.getPageControllerName()
+        if((me.pageControllerName == 'CalendarCtrl') && (!$scope.calendarEditMode())) {
+          $scope.setCalendarEditMode('grid')
+        }
       }
     })
   })
@@ -58,6 +126,14 @@ function(page,   $scope,   $state,   t) {
   }
   me.togglePalette = function() {
     me.palette = !me.palette
+  }
+  
+  me.logoClick = function() {
+    if($scope.calendarEditMode() == 'grid') {
+      $state.go('newCalendar')
+    } else {
+      $scope.setCalendarEditMode('grid')
+    }
   }
   
 }])

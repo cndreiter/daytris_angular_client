@@ -17,3 +17,19 @@ angular.module(module.exports, dependencies).factory('Event', ['$resource', func
     }
   })
 }])
+
+angular.module(module.exports).factory('EventInCollectionFactory', ['$resource', function($resource) {
+  return function(collectionId) {
+    return $resource('/prot/api/collections/:collectionId/events/:id', {
+      collectionId: collectionId,
+      filter: '@filter'
+    }, {
+      'get': {
+        isArray: true
+      },
+      'update': {
+        method: 'PUT'
+      }
+    })
+  }
+}])

@@ -1,0 +1,52 @@
+<form ng-cloak ng-show="calendar.record" class="uk-form uk-form-horizontal" ng-submit="calendar.submit()" tns="calendarInputs">
+  <div class="uk-form-row">
+    <label class="uk-form-label" t>Name</label>
+    <input class="uk-form-width-large" type="text" ng-model="calendar.record.name" placeholder="Calendar Name" t ttarget="placeholder">
+  </div>
+  <div class="uk-form-row">
+    <label class="uk-form-label" t>Scheduler</label>
+    <div>
+      <input type="checkbox" ng-model="calendar.record.isScheduler">
+      <span t>Use this Calendar as a Scheduler:</span>
+      <span t>Let people choose between multiple appointments.</span>
+    </div>
+  </div>
+  <div class="uk-form-row">
+    <label class="uk-form-label" t>Color</label>
+    <div class="dt-color-palette">
+      <a class="dt-color-icon dt-chosen" ng-click="calendar.togglePalette()" ng-style="{ 'background-color': chosenColor() }"></a>
+      <div class="dt-color-palette" ng-cloak ng-show="calendar.palette">
+        <span ng-repeat="color in nicePaleColors"><a class="dt-color-icon" color-chooser-icon="{{color}}"></a> </span>
+      </div>
+    </div>
+  </div>
+  <div class="uk-form-row">
+    <label class="uk-form-label" t>URL</label>
+    <input class="uk-form-width-medium" type="text" ng-model="calendar.record.url" placeholder="Calendar's URL ending (part after last /)" t ttarget="placeholder">
+    <span ng-controller="ClipboardCtrl">
+      <span ng-cloak ng-show="calendar.record.id">
+        <button type="button" class="uk-button" ng-cloak ng-show="calendar.record.url === pristineUrl" ui-zeroclip zeroclip-model="makeFullUrl(calendar.record.url)" zeroclip-copied="copied=true">
+          <span ng-cloak ng-show="!copied" t>Copy URL</span>
+          <span ng-cloak ng-show="copied" t>Copy URL again</span>
+        </button>
+        <button type="button" class="uk-button" ng-cloak ng-show="calendar.record.url !== pristineUrl" ng-click="calendar.record.url = pristineUrl" t>
+          Reset URL
+        </button>
+      </span>
+    </span>
+  </div>
+  <div ng-cloak ng-show="calendar.record.name" class="uk-form-row">
+    <button type="submit" class="uk-button uk-button-primary">
+      <span ng-cloak ng-show="!calendar.record.id" t>Create</span>
+      <span ng-cloak ng-show="calendar.record.id" t>Save</span>
+    </button>
+    <span ng-cloak ng-if="calendar.delete">
+      <button ng-cloak ng-if="!calendar.hasChildrenOrChildrenUnknown()" type="button" class="uk-button" ng-click="calendar.delete()" t>Delete</button>
+      <span ng-cloak ng-if="calendar.hasChildrenOrChildrenUnknown()">
+        <button type="button" class="uk-button" disabled t>Delete Disabled</button>
+        <span t>This calendar has sub-calendars.</span>
+        <span t>You need to delete or disconnect them before you can delete this calendar.</span>
+      </span>
+    </span>
+  </div>
+</form>

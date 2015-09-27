@@ -1,23 +1,55 @@
+<div ng-include="'views/nav.html'"></div>
+
 <div class="uk-panel uk-panel-box">
 
-<form class="uk-form uk-form-horizontal" ng-submit="event.submit()" tns="eventInputs">
+<form ng-cloak ng-if="event.record" class="uk-form uk-form-horizontal" ng-submit="event.submit()" tns="eventInputs">
+  <div class="uk-form-row" ng-cloak ng-if="event.collections.length">
+    <label class="uk-form-label" t>
+      <strong>
+        <span t>Event of Calendar</span>
+        <span class="dt-color-icon dt-inline" ng-style="{ 'background-color': event.collections[0].color }"></span>
+        <span ng-bind="event.collections[0].name"></span>
+      </strong>
+    </label>
+  </div>
   <div class="uk-form-row">
     <label class="uk-form-label" t>Name</label>
     <input class="uk-form-width-large" type="text" ng-model="event.record.text" placeholder="Event Name" t ttarget="placeholder">
   </div>
   <div class="uk-form-row">
+    <label class="uk-form-label" t>Description</label>
+    <textarea msd-elastic="\n" class="uk-form-width-large" type="text" ng-model="event.record.description" placeholder="Event Description" t ttarget="placeholder"></textarea>
+  </div>
+  <div class="uk-form-row">
     <label class="uk-form-label" t>Start</label>
-    <input class="uk-form-width-small" type="text" ng-model="event.record.startDate" data-uk-datepicker="{format:'YYYY-MM-DD'}" placeholder="Event's Start Day" t ttarget="placeholder">
-    <input class="uk-form-width-small" type="text" ng-model="event.record.startTime" data-uk-timepicker placeholder="Event's Start Time" t ttarget="placeholder">
+    <button type="button" class="uk-button" ng-click="event.setStartToday()" t>Today</button>
+    <input class="uk-form-width-small" type="text" ng-model="event.record.startDate" ng-change="event.updateEndDate()" data-uk-datepicker="{format:'YYYY-MM-DD'}" placeholder="Event's Start Day" t ttarget="placeholder">
+    <input class="uk-form-width-small" type="text" ng-model="event.record.startTime" ng-change="event.updateEndTime()" data-uk-timepicker placeholder="Event's Start Time" t ttarget="placeholder">
   </div>
   <div class="uk-form-row">
     <label class="uk-form-label" t>End</label>
-    <input class="uk-form-width-small" type="text" ng-model="event.record.endDate" data-uk-datepicker="{format:'YYYY-MM-DD'}" placeholder="Event's End Day" t ttarget="placeholder">
-    <input class="uk-form-width-small" type="text" ng-model="event.record.endTime" data-uk-timepicker placeholder="Event's End Time" t ttarget="placeholder">
+    <button type="button" class="uk-button" ng-click="event.setEndToday()" t>Today</button>
+    <input ng-show="!event.startDayIsEndDay" class="uk-form-width-small" type="text" ng-model="event.record.endDate" ng-change="event.updateStartDate()" data-uk-datepicker="{format:'YYYY-MM-DD'}" placeholder="Event's End Day" t ttarget="placeholder">
+    <input class="uk-form-width-small" type="text" ng-model="event.record.endTime" ng-change="event.updateStartTime()" data-uk-timepicker placeholder="Event's End Time" t ttarget="placeholder">
+  </div>
+  <div class="uk-form-row">
+    <label class="uk-form-label"></label>
+    <input type="checkbox" ng-model="event.startDayIsEndDay" ng-change="event.updateEndDate()" ng-init="event.initStartDayIsEndDay()">
+    <span t>Single-Day Event (start day = end day)</span>
   </div>
   <div class="uk-form-row">
     <label class="uk-form-label" t>URL</label>
-    <input class="uk-form-width-large" type="text" ng-model="event.record.url" placeholder="Event's URL ending (part after last /)" t ttarget="placeholder">
+    <input class="uk-form-width-medium" type="text" ng-model="event.record.url" placeholder="Event's URL ending (part after last /)" t ttarget="placeholder">
+    <span ng-controller="ClipboardCtrl">
+      <span ng-cloak ng-show="event.record.id">
+        <button type="button" class="uk-button" ng-cloak ng-show="event.record.url === pristineUrl" ui-zeroclip zeroclip-model="makeFullUrl(event.record.url)" zeroclip-copied="copied=true">
+          Copy URL <span ng-cloak ng-show="copied">again</span>
+        </button>
+        <button type="button" class="uk-button" ng-cloak ng-show="event.record.url !== pristineUrl" ng-click="event.record.url = pristineUrl">
+          Reset URL
+        </button>
+      </span>
+    </span>
   </div>
   <div ng-cloak ng-show="event.record.text" class="uk-form-row">
     <button type="submit" class="uk-button uk-button-primary" t>Save</button>
@@ -27,32 +59,29 @@
 
 </div>
 
-<div class="uk-panel uk-panel-box dt-blank-panel" ng-cloak ng-show="event.submitComment">
-  <form class="uk-form uk-form-horizontal" ng-submit="event.submitComment()" tns="commentInputs">
-    <div class="uk-form-row" ng-cloak ng-show="event.record.participants.length">
-      <label class="uk-form-label">Teilnehmer</label>
+<div class="uk-panel uk-panel-box dt-blank-panel" ng-cloak ng-show="event.comments.submit">
+  <form class="uk-form uk-form-horizontal" ng-submit="event.comments.submit()" tns="commentInputs">
+    <div class="uk-form-row" ng-cloak ng-if="event.record.participants">
+      <label class="uk-form-label">Participants</label>
       <div>
+        <span ng-cloak ng-show="event.participants.userOk()">
+          <button type="button" ng-show="!event.participants.participating(event.record.participants)"
+                  ng-click="event.participants.addParticipant(event.record.id)"
+                  class="uk-button uk-button-success">Participate</button>
+          <button type="button" ng-show="event.participants.participating(event.record.participants)"
+                  ng-click="event.participants.decline(event.record.participants)"
+                  class="uk-button uk-button-danger">Decline</button>
+        </span>
+        <span ng-show="!event.record.participants.length">Be the first participant</span>
         <span ng-repeat="participant in event.record.participants" class="dt-participant">
-          <span class="dt-color-icon dt-inline" ng-style="{ 'background-color': participant.color }"></span>
+          <a ng-click="event.participants.removeParticipant(participant.id, participant.eventId, participant.name, participant.color)"
+             class="dt-color-icon dt-inline" ng-style="{ 'background-color': participant.color }"></a>
           <span ng-bind="participant.name"></span>
         </span>
       </div>
-      <hr class="uk-article-separator">
+      <hr class="uk-article-divider">
     </div>
-    <div class="uk-form-row" ng-repeat="comment in event.comments">
-      <label class="uk-form-label dt-comment-author">
-        <span class="dt-color-icon dt-inline" ng-style="{ 'background-color': comment.color }"></span>
-        <span ng-bind="comment.name"></span>
-        <input type="checkbox" ng-model="comment.marked">
-      </label>
-      <div class="dt-comment-message" ng-bind="comment.message"></div>
-    </div>
-    <div class="uk-form-row" ng-cloak ng-show="event.markedComments().length">
-      <button type="button" class="uk-button" ng-click="event.deleteMarkedComments()">Delete selected comments</button>
-    </div>
-    <div class="uk-form-row">
-      <label class="uk-form-label" t>Message</label>
-      <input class="uk-form-width-large dt-message-input" type="text" ng-model="event.comment.message" placeholder="Your Message" t ttarget="placeholder">
-    </div>
+    <div class="uk-form-row" ng-cloak ng-show="event.comments.comments.length" ng-include="'views/comments.html'"></div>
+    <div class="uk-form-row" ng-include="'views/comments.inputs.html'"></div>
   </form>
 </div>

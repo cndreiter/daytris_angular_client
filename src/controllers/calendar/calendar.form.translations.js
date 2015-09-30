@@ -45,6 +45,11 @@ var subCalendarInputs = {
   'Create a new Calendar': 'Neuen Kalender anlegen'
 }
 
+var calendarConnectInputs = {
+  "Paste the Calendar's URL": 'Füge die URL des Kalenders hier ein:',
+  "Existing Calendar's URL": 'URL des existierenden Kalenders'
+}
+
 var calendarReadOnly = {
   'Edit': 'Bearbeiten',
   'Disconnect': 'Trennen'
@@ -62,6 +67,7 @@ var commentInputs = {
 module.exports = function(t) {
   t.add('calendarInputs', calendarInputs)
   t.add('subCalendarInputs', subCalendarInputs)
+  t.add('calendarConnectInputs', calendarConnectInputs)
   t.add('calendarReadOnly', calendarReadOnly)
   t.add('alternatives', alternatives)
   t.add('commentInputs', commentInputs)

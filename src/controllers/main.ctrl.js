@@ -26,9 +26,38 @@ function(page,   $scope,   $state,   $stateParams ,  colors,   t) {
      *      okFunc: deleteParticipant
      *    }
      */
-    //$scope.main.messageModal = message
     me.messageModal = message
     UIkit.modal('#messageModal').show()
+  }
+  
+  me.showEmailAddressModal = function(message) {
+   /*
+    * example for message variable:
+    *
+    *    var mt = t.allTranslations.emailAddressModal
+    *    message = {
+    *      message: mt['Provide your e-mail address to stay informed.'],
+    *      okFunc: deleteParticipant
+    *    }
+    */
+    var modalId = '#emailAddressModal'
+    me.emailAddressModal = message
+    me.emailAddressModal.emailAddressValid = function() {
+      return me.emailAddressModal.emailAddress && $scope.emailAddressForm.$valid
+    }
+    me.emailAddressModal.setAnonymousUserEmailAddressFunc = function() {
+      if(me.emailAddressModal.emailAddressValid()) {
+        page.setUserEmailAddress(me.emailAddressModal.emailAddress)
+        me.emailAddressModal.okFunc()
+        UIkit.modal(modalId).hide()
+      }
+    }
+    UIkit.modal(modalId).show()
+    $('#emailAddressModal form input')[0].focus()
+  }
+  
+  me.getUserEmailAddress = function() {
+    return page.userEmailAddress
   }
   
   $scope.niceColors = colors.niceColors

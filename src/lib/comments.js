@@ -10,7 +10,7 @@ angular.module(module.exports, dependencies).factory('comments', [
         'page', 'Comment', 't',
 function(page,   Comment,   t) {
   var comments = {}
-  comments.forParent = function(parent, listeners) {
+  comments.forParent = function(parent, emailAddressModalCallback, listeners) {
     var me = {}
     
     var parentIdName = parent.idName
@@ -37,7 +37,7 @@ function(page,   Comment,   t) {
           id: comment.id
         }
         deleteArguments[parentIdName] = parentRecord.id
-        deleteArguments[parentUrlName] = parentRecord.url
+        deleteArguments[parentUrlName] = parentRecord.url // for authorization
         Comment.delete(deleteArguments, function() {
           done.count += 1
           if(done.count >= n) {
@@ -51,13 +51,13 @@ function(page,   Comment,   t) {
       var filterArguments = {
         where: {}
       }
-      filterArguments[parentUrlName] = parentRecord.url
+      filterArguments[parentUrlName] = parentRecord.url // for authorization
       filterArguments.where[parentIdName] = parentRecord.id
       Comment.get({
         filter: JSON.stringify(filterArguments)
       }, function(response) {
         me.comments = response.data
-        if(listeners.load) {
+        if(listeners && listeners.load) {
           listeners.load(response, initial)
         }
       })
@@ -65,15 +65,30 @@ function(page,   Comment,   t) {
     
     me.init = function() {
       me.submit = function() {
-        var comment = new Comment({})
-        comment[parentIdName] = parentRecord.id
-        comment[parentUrlName] = parentRecord.url
-        comment.name = page.username
-        comment.color = page.userColor
-        comment.message = me.comment.message
-        comment.$save(function() {
-          me.comment = {}
-        })
+        if(page.username && page.userColor) {
+          var createComment = function() {
+            var comment = new Comment({})
+            comment[parentIdName] = parentRecord.id
+            comment[parentUrlName] = parentRecord.url // for authorization
+            comment.name = page.username
+            comment.emailAddress = page.userEmailAddress
+            comment.color = page.userColor
+            comment.message = me.comment.message
+            comment.$save(function() {
+              me.comment = {}
+            })
+          }
+          // email address modal
+          if(!page.userEmailAddress) {
+            var mt = t.allTranslations.emailAddressModal
+            emailAddressModalCallback({
+              message: mt['Provide your e-mail address to stay informed about changes.'],
+              okFunc: createComment
+            })
+          } else {
+            createComment()
+          }
+        }
       }
       me.loadComments(true)
     }

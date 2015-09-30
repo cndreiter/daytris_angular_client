@@ -13,17 +13,23 @@ angular.module(module.exports, dependencies).factory('page', ['$cookies', functi
   // initialization: retrieve user cookie
   var userCookie = $cookies.getObject('anonymousUser') || {}
   page.username = userCookie.username
+  page.userEmailAddress = userCookie.emailAddress
   page.userColor = userCookie.color
   
   // save user to cookie
   page.saveUser = function() {
     $cookies.putObject('anonymousUser', {
       username: page.username,
+      emailAddress: page.userEmailAddress,
       color: page.userColor
     })
   }
   page.setUsername = function(username) {
     page.username = username
+    page.saveUser()
+  }
+  page.setUserEmailAddress = function(emailAddress) {
+    page.userEmailAddress = emailAddress
     page.saveUser()
   }
   page.setUserColor = function(color) {

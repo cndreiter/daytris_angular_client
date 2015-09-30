@@ -59,6 +59,10 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
         }
         
         me.submit = function() {
+          if(me.record.emailAddress) {
+            // FIXME query validity from input
+            page.setUserEmailAddress(me.record.emailAddress)
+          }
           Collection.update({ id: me.record.id }, me.record, function() {
             me.hideSubCalendarEditForm()
           })
@@ -66,7 +70,10 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
         me.delete = function() {
           Collection.get({
             filter: JSON.stringify({
-              where: { id: me.record.id },
+              where: {
+                id: me.record.id,
+                url: me.record.url // for authorization
+              },
               include: {
                 relation: 'events',
                 scope: {
@@ -78,7 +85,10 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
             var record = records[0]
             if(record) {
               var deleteCalendar = function() {
-                Collection.delete({ id: me.record.id }, function() {
+                Collection.delete({
+                  id: me.record.id,
+                  url: me.record.url // for authorization
+                }, function() {
                   if(!$scope.parentCalendar) {
                     $state.go('calendarDefaultView')
                   } else {
@@ -113,6 +123,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
           var EventInCollection = EventInCollectionFactory(me.record.id)
           EventInCollection.get({
             filter: JSON.stringify({
+              parentUrl: me.record.url, // for authorization
               include: ['participants', 'comments']
             })
           }, function(records) {
@@ -130,7 +141,9 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
           idName: 'collectionId',
           urlName: 'collectionUrl',
           record: me.record
-        }, {
+        },
+        $scope.main.showEmailAddressModal,
+        {
           load: function(response, initial) {
             if(initial) {
               var messageInput = $('.dt-message-input')[0] // FIXME make this independent of the REST response
@@ -163,6 +176,8 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
         var record = records[0]
         if(record) {
           var linkRecord = new CollectionCollection({
+            parentUrl: me.record.url, // for authorization
+            childUrl: record.url, // for authorization
             parentId: me.record.id,
             childId: record.id
           })
@@ -178,6 +193,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
     var parentCalendar = $scope.parentCalendar
     CollectionCollection.get({
       filter: JSON.stringify({
+        childUrl: me.record.url, // for authorization
         where: { childId: me.record.id }
       })
     }, function(records) {
@@ -189,7 +205,12 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
         var id = linkToParentCalendar.id
         var parentId = linkToParentCalendar.parentId
         var childId = linkToParentCalendar.childId
-        CollectionCollection.delete({ id: id, parentId: parentId, childId: childId }, function() {
+        CollectionCollection.delete({
+          id: id,
+          parentUrl: parentCalendar.record.url, // for authorization
+          parentId: parentId,
+          childId: childId
+        }, function() {
           $state.go('calendar', { collectionUrl: me.record.url })
         })
       }
@@ -230,13 +251,20 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
     // CREATE
     var hasParent = !!$scope.parentCalendar
     if(hasParent) {
-      var SubCollection = SubCollectionFactory($scope.parentCalendar.record.id)
-      me.record = new SubCollection({})
+      var parentRecord = $scope.parentCalendar.record
+      var SubCollection = SubCollectionFactory(parentRecord.id)
+      me.record = new SubCollection({
+        parentUrl: parentRecord.url // for authorization
+      })
     } else {
       me.record = new Collection({})
     }
 
     me.submit = function() {
+      if(me.record.emailAddress) {
+        // FIXME query validity from input
+        page.setUserEmailAddress(me.record.emailAddress)
+      }
       me.record.$save(function() {
         $state.go('calendar', {
           collectionUrl: hasParent? $scope.parentCalendar.record.url : me.record.url
@@ -316,20 +344,37 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   Collection,   C
   
   // websocket update
   $scope.$on('pubsub-message', function(event, message) {
-    if(message.id) {
-      load({ id: message.id }, function(records) {
-        var record = records[0]
-        if(record) {
-          if(record.url == url) {
-            loadCollection(url)
-          } else {
-            $state.go('calendar', { collectionUrl: record.url })
-          }
-        }
-      })
-    } else {
-      loadCollection(url)
+    // var id = message.id || message.parentId
+    // if(id) {
+    //   load({
+    //     id: id,
+    //     url: me.record.url // FIXME if someone else changed the url, it is different
+    //   }, function(records) {
+    //     var record = records[0]
+    //     if(record) {
+    //       if(record.url == url) {
+    //         loadCollection(url)
+    //       } else {
+    //         $state.go('calendar', { collectionUrl: record.url })
+    //       }
+    //     }
+    //   })
+    // } else {
+      
+    // if someone else changes the url, this will not work
+    // but since they maybe do not want to share the new URL, that is ok for now
+    if(me.record.url) {
+      loadCollection(me.record.url)
     }
+    // console.log("MESSAGE ", message)
+    if(message.collection == 'events') {
+      $scope.refetchEvents()
+    }
+    if(message.change.indexOf('linked to event') == 0) {
+      $scope.refetchEvents()
+    }
+      
+    // }
   })
   
   var removeGridEventSource = $scope.removeGridEventSource

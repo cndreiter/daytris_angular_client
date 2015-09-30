@@ -16,6 +16,10 @@ var calendarInputs = {
   // Farbe
   'Color': 'Farbe',
   
+  // E-Mail-Adresse
+  'E-Mail Address': 'E-Mail-Adresse',
+  'Your E-Mail Address': 'Deine E-Mail-Adresse',
+  
   // URL
   "Calendar's URL ending (part after last /)": "URL-Ende (Teil der URL nach dem letzten /)",
   'Copy URL': 'URL kopieren',

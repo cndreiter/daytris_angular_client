@@ -40,6 +40,14 @@ var calendarMessageModal = {
   'Cancel': 'Abbrechen'
 }
 
+var emailAddressModal = {
+  'Provide your e-mail address to stay informed about changes.': 'Gib deine E-Mail-Adresse ein, um über Änderungen informiert zu werden.',
+  'Please type your e-mail address': 'Deine E-Mail-Adresse',
+  'OK': 'OK',
+  'Skip this': 'Überspringen (keine E-Mail-Benachrichtigung)',
+  'Cancel': 'Abbrechen'
+}
+
 var subCalendarMessageModal = {
   // Text (Information, Warnung, Frage, ...)
   "Remove this sub-calendar's last parent link? This action will make it stand-alone. Please remember its URL ": 'Die letzte Verbindung zu diesem Unter-Kalender trennen? Dadurch wird der Unter-Kalender eigenständig. Bitte merke dir seine URL: ',
@@ -61,6 +69,7 @@ module.exports = function(t) {
   t.add('navigation', navigation)
   t.add('participantMessageModal', participantMessageModal)
   t.add('calendarMessageModal', calendarMessageModal)
+  t.add('emailAddressModal', emailAddressModal)
   t.add('subCalendarMessageModal', subCalendarMessageModal)
   t.add('user', user)
 }

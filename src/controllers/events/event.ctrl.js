@@ -21,13 +21,11 @@ angular.module(module.exports, dependencies).controller('EventCtrl', [
         'page', '$scope', '$state', '$stateParams', 'Event', 'Collection', 'EventInCollectionFactory', 'Participant', 'participants', 'Comment', 'comments', 'date', 't', 'pubsub',
 function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  EventInCollectionFactory,   Participant,   participants,   Comment,   comments,   date,   t,   pubsub) {
   
-  console.log("EVENT.CTRL SCOPE")
-  
   var me = this
   
   page.collectionUrl = page.collectionUrl || $stateParams.collectionUrl
   
-  me.participants = participants.forAController($scope.main.showMessage, {})
+  me.participants = participants.forAController($scope.main.showMessage, $scope.main.showEmailAddressModal, {})
   
   translations(t) // use translations from event.translations.js
   
@@ -42,7 +40,7 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  Even
     Collection.get({
       filter: JSON.stringify({
         where: {
-          url: collectionUrl
+          url: collectionUrl // sufficient for authorization
         }
       })
     }, function(records) {
@@ -52,7 +50,9 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  Even
         page.title = page.title || collectionRecord.name
         
         var EventInCollection = EventInCollectionFactory(collectionRecord.id)
-        me.record = new EventInCollection({})
+        me.record = new EventInCollection({
+          parentUrl: collectionUrl // for authorization
+        })
 
         var today = new Date()
 
@@ -61,6 +61,11 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  Even
 
         me.record.endDate = date.stringify('date', today)
         me.record.endTime = '10:00'
+
+        if(me.record.emailAddress) {
+          // FIXME query validity from input
+          page.setUserEmailAddress(me.record.emailAddress)
+        }
 
         me.submit = function() {
           me.record.$save(function() {
@@ -73,12 +78,19 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  Even
   
   var initExisting = function() {
     me.submit = function() {
+      if(me.record.emailAddress) {
+        // FIXME query validity from input
+        page.setUserEmailAddress(me.record.emailAddress)
+      }
       Event.update({ id: me.record.id }, me.record, function() {
         $scope.setCalendarEditMode('grid')
       })
     }
     me.delete = function() {
-      Event.delete({ id: me.record.id }, function() {
+      Event.delete({
+        id: me.record.id,
+        url: me.record.url // for authorization
+      }, function() {
         $scope.setCalendarEditMode('grid')
       })
     }
@@ -90,7 +102,7 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  Even
     Event.get({
       filter: JSON.stringify({
         where: {
-          url: url
+          url: url // for authorization
         },
         include: ['collections', 'participants']
       })
@@ -109,7 +121,9 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  Even
           idName: 'eventId',
           urlName: 'eventUrl',
           record: me.record
-        }, {
+        },
+        $scope.main.showEmailAddressModal,
+        {
           load: function(response, initial) {
             if(initial) {
               $('.dt-message-input')[0].focus() // FIXME make this independent of the REST response
@@ -181,7 +195,7 @@ function(page,   $scope,   $state,   $stateParams,   Event,   Collection ,  Even
   var loadParticipants = function() {
     Participant.get({
       filter: JSON.stringify({
-        eventUrl: me.record.url,
+        eventUrl: me.record.url, // for authorization
         where: {
           eventId: me.record.id
         }

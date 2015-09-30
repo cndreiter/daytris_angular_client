@@ -26,8 +26,19 @@ var eventInputs = {
   "Event's End Day": 'Ende-Tag des Termins',
   "Event's End Time": 'Ende-Zeit des Termins',
   
+  // E-Mail-Adresse
+  'E-Mail Address': 'E-Mail-Adresse',
+  'Your E-Mail Address': 'Deine E-Mail-Adresse',
+  
   // URL
   "Event's URL ending (part after last /)": "URL-Ende (Teil der URL nach dem letzten /)"
+}
+
+var participants = {
+  'Participants': 'Teilnehmer',
+  'Participate': 'Teilnehmen',
+  'Decline': 'Absagen',
+  'Be the first participant': 'Sei der erste Teilnehmer'
 }
 
 var commentInputs = {
@@ -37,5 +48,6 @@ var commentInputs = {
 
 module.exports = function(t) {
   t.add('eventInputs', eventInputs)
+  t.add('participants', participants)
   t.add('commentInputs', commentInputs)
 }

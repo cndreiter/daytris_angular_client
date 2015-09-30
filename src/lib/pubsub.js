@@ -27,6 +27,7 @@ angular.module(module.exports, dependencies).factory('pubsub', ['$rootScope', fu
     })
     pubsub.client.on('message', function(topic, msg) {
       var message = msg.toString() // e.g. "changed"
+      console.log("PUBSUB ", topic, message)
       var parts = topic.split('/')
       if(parts.length == 2) {
         $rootScope.$broadcast('pubsub-message', {

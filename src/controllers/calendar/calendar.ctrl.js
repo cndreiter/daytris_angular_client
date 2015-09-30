@@ -19,6 +19,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
   
   page.collectionUrl = $stateParams.collectionUrl
   
+  me.knownEvents = {} // used for event URL retrieval on websocket update
   me.reloadedEvents = {} // reloaded events contain up-to-date participant lists
   
   me.subCalendars = {}
@@ -31,7 +32,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
     case 'month': view = 'month'; break
   }
   
-  me.participants = participants.forAController($scope.main.showMessage, {
+  me.participants = participants.forAController($scope.main.showMessage, $scope.main.showEmailAddressModal, {
     // listeners
     'add': function() {
       //uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
@@ -67,15 +68,20 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
     }
   }
   
-  var getEventsFunc = function(calendarId) {
+  var getEventsFunc = function(calendarId, calendarUrl) {
     return function(start, end, timezone, callback) {
       var EventInCollection = EventInCollectionFactory(calendarId)
       EventInCollection.get({
         filter: JSON.stringify({
+          parentUrl: calendarUrl, // for authorization
           include: 'participants'
         })
       }, function(records) {
         var mapped = records.map(function(record) {
+          
+          // push event onto knownEvents
+          me.knownEvents[record.id] = record
+          
           var startDate = moment(record.startDate + 'T' + record.startTime).toDate()
           var endDate = moment(record.endDate + 'T' + record.endTime).toDate()
           var time = startDate.getTime()
@@ -88,7 +94,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
           }
           return {
             id: record.id,
-            eventUrl: record.url,
+            eventUrl: record.url, // CAUTION this MUST be != "url" because URL is used by fullcalendar.io
             title: record.text,
             start: startDate,
             end: endDate,
@@ -119,7 +125,7 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
     }
     var uid = new Date().getMilliseconds() // uid: used for debugging purposes only
     me.subCalendars['' + calendar.id] = {
-      events: getEventsFunc(calendar.id),
+      events: getEventsFunc(calendar.id, calendar.url),
       color: (calendar.color || 'white'),
       uid: uid
     }
@@ -172,24 +178,33 @@ function(page,   $scope,   $compile,   $state,   $stateParams,   uiCalendarConfi
       uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('refetchEvents')
     }
   }
+  $scope.refetchEvents = me.refetchEvents
   
   // websocket update
   $scope.$on('pubsub-message', function(event, message) {
     var eventId = message.parentId
-    Event.get({
-      filter: JSON.stringify({
-        where: { id: eventId },
-        include: 'participants'
-      })
-    }, function(records) {
-      var record = records[0]
-      if(record) {
-        if(record.id == eventId) {
-          me.reloadedEvents[eventId] = record
-          uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('rerenderEvents')
+    var record = me.knownEvents[eventId]
+    if(record) {
+      var eventUrl = record.url
+      Event.get({
+        filter: JSON.stringify({
+          where: {
+            id: eventId,
+            url: eventUrl // for authorization
+          },
+          include: 'participants'
+        })
+      }, function(records) {
+        var record = records[0]
+        if(record) {
+          if(record.id == eventId) {
+            record.eventUrl = record.url
+            me.reloadedEvents[eventId] = record
+            uiCalendarConfig.calendars.daytrisCalendar.fullCalendar('rerenderEvents')
+          }
         }
-      }
-    })
+      })
+    }
     
   })
   

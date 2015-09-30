@@ -21,6 +21,10 @@
     </div>
   </div>
   <div class="uk-form-row">
+    <label class="uk-form-label" t>E-Mail Address</label>
+    <input class="uk-form-width-large" type="email" ng-model="calendar.record.emailAddress" ng-init="calendar.record.emailAddress = main.getUserEmailAddress()" placeholder="Your E-Mail Address" t ttarget="placeholder">
+  </div>
+  <div class="uk-form-row">
     <label class="uk-form-label" t>URL</label>
     <input class="uk-form-width-medium" type="text" ng-model="calendar.record.url" placeholder="Calendar's URL ending (part after last /)" t ttarget="placeholder">
     <span ng-controller="ClipboardCtrl">

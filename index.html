@@ -89,6 +89,22 @@
       </div>
     </div>
     
+    <div id="emailAddressModal" class="uk-modal" tns="emailAddressModal">
+      <div class="uk-modal-dialog">
+        <div ng-bind="main.emailAddressModal.message"></div>
+        <hr class="dt-blank-divider">
+        <form class="uk-form" name="emailAddressForm" ng-submit="main.emailAddressModal.setAnonymousUserEmailAddressFunc()">
+          <input type="email" class="uk-width-medium" ng-model="main.emailAddressModal.emailAddress" placeholder="Please type your e-mail address" t ttarget="placeholder">
+        </form>
+        <hr class="dt-blank-divider">
+        <div>
+          <button type="submit" class="uk-button uk-button-primary uk-modal-close" ng-disabled="!main.emailAddressModal.emailAddressValid()" t>OK</button>
+          <button type="button" class="uk-button uk-modal-close" ng-click="main.emailAddressModal.okFunc()" t>Skip this</button>
+          <button type="button" class="uk-button uk-modal-close" t>Cancel</button>
+        </div>
+      </div>
+    </div>
+    
     <div class="dt-page dt-table-grid">
       <div class="dt-table-grid-cell dt-outer-sidebar">
         <a ng-click="main.logoClick()"><img alt="Daytris Logo" src="images/daytris.jpg"></a>

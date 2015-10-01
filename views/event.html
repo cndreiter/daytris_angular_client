@@ -47,9 +47,10 @@
     <span ng-controller="ClipboardCtrl">
       <span ng-cloak ng-show="event.record.id">
         <button type="button" class="uk-button" ng-cloak ng-show="event.record.url === pristineUrl" ui-zeroclip zeroclip-model="makeFullUrl(event.record.url)" zeroclip-copied="copied=true">
-          Copy URL <span ng-cloak ng-show="copied">again</span>
+          <span ng-cloak ng-show="!copied" t>Copy URL</span>
+          <span ng-cloak ng-show="copied" t>Copy URL again</span>
         </button>
-        <button type="button" class="uk-button" ng-cloak ng-show="event.record.url !== pristineUrl" ng-click="event.record.url = pristineUrl">
+        <button type="button" class="uk-button" ng-cloak ng-show="event.record.url !== pristineUrl" ng-click="event.record.url = pristineUrl" t>
           Reset URL
         </button>
       </span>

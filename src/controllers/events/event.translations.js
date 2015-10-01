@@ -31,7 +31,10 @@ var eventInputs = {
   'Your E-Mail Address': 'Deine E-Mail-Adresse',
   
   // URL
-  "Event's URL ending (part after last /)": "URL-Ende (Teil der URL nach dem letzten /)"
+  "Event's URL ending (part after last /)": "URL-Ende (Teil der URL nach dem letzten /)",
+  'Copy URL': 'URL kopieren',
+  'Copy URL again': 'URL erneut kopieren',
+  'Reset URL': 'URL zurücksetzen'
 }
 
 var participants = {

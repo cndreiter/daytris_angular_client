@@ -39,7 +39,7 @@
   </div>
   <div class="uk-form-row">
     <label class="uk-form-label" t>E-Mail Address</label>
-    <input class="uk-form-width-large" type="email" ng-model="event.record.emailAddress" ng-init="event.record.emailAddress = main.getUserEmailAddress()" placeholder="Your E-Mail Address" t ttarget="placeholder">
+    <input class="uk-form-width-large" type="email" ng-model="event.record.emailAddress" ng-init="event.record.emailAddress = event.record.emailAddress || main.getUserEmailAddress()" placeholder="Your E-Mail Address" t ttarget="placeholder">
   </div>
   <div class="uk-form-row">
     <label class="uk-form-label" t>URL</label>

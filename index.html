@@ -2,47 +2,43 @@
 
 <html lang="en" ng-app="daytris">
   <head>
-    <script type="text/javascript" src="/demo/config/base.js"></script>
-    <script type="text/javascript">
-    var baseTagHref = (typeof BASE_TAG_HREF !== 'undefined')? BASE_TAG_HREF : '/';
-    document.write('<base href="' + baseTagHref + '">')
-    </script>
+    <base href="/demo/">
     <meta charset="utf-8">
     <title>Daytris</title>
     
     <link rel="stylesheet/less" type="text/css" href="less/daytris.less">
     <script src="less/less.js" type="text/javascript"></script>
     
-    <link rel="shortcut icon" type="image/png" href="images/favicon.png">
+    <link rel="shortcut icon" type="image/png" href="/demo/images/favicon.png">
     
     <!-- JAVASCRIPTS -->
     
     <!-- angular-ui-calendar with angular -->
     <!-- jquery, moment, and angular have to get included before fullcalendar -->
-    <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
-    <script type="text/javascript" src="bower_components/moment/min/moment.min.js"></script>
-    <script type="text/javascript" src="bower_components/angular/angular.js"></script>
-    <script type="text/javascript" src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
-    <script type="text/javascript" src="bower_components/angular-resource/angular-resource.js"></script>
-    <script type="text/javascript" src="bower_components/angular-cookies/angular-cookies.js"></script>
-    <script type="text/javascript" src="bower_components/angular-ui-calendar/src/calendar.js"></script>
-    <script type="text/javascript" src="bower_components/fullcalendar/dist/fullcalendar.js"></script>
-    <script type="text/javascript" src="bower_components/fullcalendar/dist/lang/de.js"></script>
-    <script type="text/javascript" src="bower_components/fullcalendar/dist/gcal.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular-resource.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular-cookies.min.js"></script>
+    <script type="text/javascript" src="/demo/bower_components/angular-ui-calendar/src/calendar.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.1/fullcalendar.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.1/lang/de.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.1/gcal.js"></script>
     
     <!-- uikit -->
-    <script type="text/javascript" src="bower_components/uikit/js/uikit.js"></script>
-    <script type="text/javascript" src="bower_components/uikit/js/components/autocomplete.js"></script>
-    <script type="text/javascript" src="bower_components/uikit/js/components/datepicker.js"></script>
-    <script type="text/javascript" src="bower_components/uikit/js/components/timepicker.js"></script>
-    <script type="text/javascript" src="bower_components/uikit/js/components/tooltip.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.22.0/js/uikit.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.22.0/js/components/autocomplete.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.22.0/js/components/datepicker.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.22.0/js/components/timepicker.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.22.0/js/components/tooltip.min.js"></script>
     
     <!-- angular-elastic -->
-    <script type="text/javascript" src="bower_components/angular-elastic/elastic.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-elastic/2.5.0/elastic.min.js"></script>
     
     <!-- angular-zeroclipboard -->
-    <script type="text/javascript" src="bower_components/zeroclipboard/dist/ZeroClipboard.js"></script>
-    <script type="text/javascript" src="bower_components/angular-zeroclipboard/src/angular-zeroclipboard.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js"></script>
+    <script type="text/javascript" src="/demo/bower_components/angular-zeroclipboard/src/angular-zeroclipboard.js"></script>
     
     <!-- primus, pubsub -->
     <script type="text/javascript" src="/primus/primus.js"></script>
@@ -52,7 +48,7 @@
     </script>
     
     <!-- daytris -->
-    <script type="text/javascript" src="dist/bundle.js"></script>
+    <script type="text/javascript" src="/demo/dist/bundle.js"></script>
     
   </head>
   <body ng-controller="MainCtrl as main">

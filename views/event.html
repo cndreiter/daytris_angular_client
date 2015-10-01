@@ -23,7 +23,7 @@
   <div class="uk-form-row">
     <label class="uk-form-label" t>Start</label>
     <button type="button" class="uk-button" ng-click="event.setStartToday()" t>Today</button>
-    <input class="uk-form-width-small" type="text" ng-model="event.record.startDate" ng-change="event.updateEndDate()" data-uk-datepicker="{format:'YYYY-MM-DD'}" placeholder="Event's Start Day" t ttarget="placeholder">
+    <input class="uk-form-width-small" type="text" ng-model="event.record.startDate" ng-change="event.updateEndDate()" data-uk-datepicker="{format:'YYYY-MM-DD', i18n:{months:['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],weekdays:['So','Mo','Di','Mi','Do','Fr','Sa']}}" placeholder="Event's Start Day" t ttarget="placeholder">
     <input class="uk-form-width-small" type="text" ng-model="event.record.startTime" ng-change="event.updateEndTime()" data-uk-timepicker placeholder="Event's Start Time" t ttarget="placeholder">
   </div>
   <div class="uk-form-row">

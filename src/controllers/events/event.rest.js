@@ -2,11 +2,12 @@
 
 module.exports = 'controllers/events/event-rest'
 var dependencies = [
-  'ngResource'
+  'ngResource',
+  require('../../lib/resource.js')
 ]
 
-angular.module(module.exports, dependencies).factory('Event', ['$resource', function($resource) {
-  return $resource('/prot/api/events/:id', {
+angular.module(module.exports, dependencies).factory('Event', ['$resource', 'resource', function($resource, resource) {
+  return $resource(resource.restApiRoot + '/events/:id', {
     filter: '@filter'
   }, {
     'get': {
@@ -18,9 +19,9 @@ angular.module(module.exports, dependencies).factory('Event', ['$resource', func
   })
 }])
 
-angular.module(module.exports).factory('EventInCollectionFactory', ['$resource', function($resource) {
+angular.module(module.exports).factory('EventInCollectionFactory', ['$resource', 'resource', function($resource, resource) {
   return function(collectionId) {
-    return $resource('/prot/api/collections/:collectionId/events/:id', {
+    return $resource(resource.restApiRoot + '/collections/:collectionId/events/:id', {
       collectionId: collectionId,
       filter: '@filter'
     }, {

@@ -2,11 +2,12 @@
 
 module.exports = 'controllers/participants/participant-rest'
 var dependencies = [
-  'ngResource'
+  'ngResource',
+  require('../../lib/resource.js')
 ]
 
-angular.module(module.exports, dependencies).factory('Participant', ['$resource', function($resource) {
-  return $resource('/prot/api/participants/:id', {
+angular.module(module.exports, dependencies).factory('Participant', ['$resource', 'resource', function($resource, resource) {
+  return $resource(resource.restApiRoot + '/participants/:id', {
     filter: '@filter'
   }, {
     'get': {

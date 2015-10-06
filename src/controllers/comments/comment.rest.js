@@ -2,11 +2,12 @@
 
 module.exports = 'controllers/comments/comment-rest'
 var dependencies = [
-  'ngResource'
+  'ngResource',
+  require('../../lib/resource.js')
 ]
 
-angular.module(module.exports, dependencies).factory('Comment', ['$resource', function($resource) {
-  return $resource('/prot/api/comments/:id', {
+angular.module(module.exports, dependencies).factory('Comment', ['$resource', 'resource', function($resource, resource) {
+  return $resource(resource.restApiRoot + '/comments/:id', {
     filter: '@filter'
   }, {
     'get': {

@@ -2,11 +2,12 @@
 
 module.exports = 'controllers/calendar/collection-rest'
 var dependencies = [
-  'ngResource'
+  'ngResource',
+  require('../../lib/resource.js')
 ]
 
-angular.module(module.exports, dependencies).factory('Collection', ['$resource', function($resource) {
-  return $resource('/prot/api/collections/:id', {
+angular.module(module.exports, dependencies).factory('Collection', ['$resource', 'resource', function($resource, resource) {
+  return $resource(resource.restApiRoot + '/collections/:id', {
     filter: '@filter'
   }, {
     'get': {
@@ -18,8 +19,8 @@ angular.module(module.exports, dependencies).factory('Collection', ['$resource',
   })
 }])
 
-angular.module(module.exports).factory('CollectionCollection', ['$resource', function($resource) {
-  return $resource('/prot/api/collectionCollections/:id', {
+angular.module(module.exports).factory('CollectionCollection', ['$resource', 'resource', function($resource, resource) {
+  return $resource(resource.restApiRoot + '/collectionCollections/:id', {
     filter: '@filter'
   }, {
     'get': {
@@ -31,9 +32,9 @@ angular.module(module.exports).factory('CollectionCollection', ['$resource', fun
   })
 }])
 
-angular.module(module.exports).factory('SubCollectionFactory', ['$resource', function($resource) {
+angular.module(module.exports).factory('SubCollectionFactory', ['$resource', 'resource', function($resource, resource) {
   return function(parentId) {
-    return $resource('/prot/api/collections/:parentId/collections/:id', {
+    return $resource(resource.restApiRoot + '/collections/:parentId/collections/:id', {
       parentId: parentId,
       filter: '@filter'
     }, {

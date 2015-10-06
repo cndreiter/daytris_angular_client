@@ -1,3 +1,9 @@
+<!--
+Copyright (C) Christian Niederreiter <cndreiter@gmail.com>
+Unauthorized copying of this file, via any medium, is strictly prohibited
+Proprietary and confidential
+-->
+
 <span ng-repeat="event in calendar.sortedAlternativeEvents" tns="alternatives">
   <a ui-sref="calendarEvent({ collectionUrl: calendar.record.url, eventUrl: event.url })" class="dt-color-icon dt-number-icon" ng-class="{ 'dt-chosen': (!$index) }" color-icon="{{calendar.record.color || 'gray'}}" ng-bind="event.participants.length"></a>
   <div class="dt-icon-meta-text">
